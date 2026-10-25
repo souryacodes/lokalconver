@@ -1,0 +1,17 @@
+:root { color-scheme: dark; }
+body { margin: 0; background: #07090f; color: #edeff8; font-family: system-ui, sans-serif; }
+main { max-width: 36rem; margin: 0 auto; padding: 1rem; }
+label { display: block; margin-top: 1rem; }
+input, select, button { font: inherit; margin-top: 0.25rem; padding: 0.5rem; background: #0f1424; color: inherit; border: 1px solid #222a45; border-radius: 0.5rem; }
+input[type="range"], input[type="file"] { width: 100%; box-sizing: border-box; }
+.row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.row input { flex: 1; min-width: 6rem; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; }
+button { cursor: pointer; }
+#convert { background: linear-gradient(90deg, #7c5cff, #22d3ee); color: #07090f; border: 0; font-weight: 600; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.muted { color: #8e97b8; }
+#status[data-kind="error"] { color: #f87171; }
+#notes { color: #fbbf24; }
+#preview { max-width: 100%; margin-top: 1rem; background: repeating-conic-gradient(#222a45 0% 25%, #0f1424 0% 50%) 50% / 16px 16px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

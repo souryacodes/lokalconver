@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Same strict rules as the real site, so a CSP problem shows up here too. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; worker-src 'self' blob:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Image converter test page</title>
+  <link rel="stylesheet" href="./image-test.css">
+</head>
+<body>
+  <main>
+    <h1>Image converter test page</h1>
+    <p class="muted">For testing only. Open the browser console (F12) and the Network tab while you use it.</p>
+
+    <label for="file">Picture</label>
+    <input id="file" type="file" accept="image/*,.heic,.heif,.avif,.svg">
+
+    <label for="format">Convert to</label>
+    <select id="format"></select>
+
+    <label for="quality">Quality: <output id="qualityOut">85</output></label>
+    <input id="quality" type="range" min="1" max="100" value="85">
+
+    <label for="resizeMode">Resize</label>
+    <select id="resizeMode">
+      <option value="none">Keep size</option>
+      <option value="max">Max width / height</option>
+      <option value="percent">Percent</option>
+    </select>
+    <div class="row">
+      <input id="maxWidth" type="number" min="1" placeholder="max width px" aria-label="Max width in pixels">
+      <input id="maxHeight" type="number" min="1" placeholder="max height px" aria-label="Max height in pixels">
+      <input id="percent" type="number" min="1" max="400" placeholder="percent" aria-label="Resize percent">
+    </div>
+
+    <label for="background">Background (for JPG and BMP)</label>
+    <input id="background" type="color" value="#ffffff">
+
+    <label for="targetKB">Target size in KB (jpg, webp, avif only; empty = off)</label>
+    <input id="targetKB" type="number" min="1" placeholder="for example 50">
+
+    <p class="muted">Metadata (EXIF, GPS, camera) is always removed.</p>
+
+    <div class="row">
+      <button id="convert" type="button">Convert</button>
+      <button id="cancel" type="button" disabled>Cancel</button>
+    </div>
+
+    <p id="status" role="status"></p>
+    <ul id="notes"></ul>
+    <p id="result"></p>
+    <a id="download" hidden>Download result</a>
+    <img id="preview" alt="Preview of the result" hidden>
+  </main>
+  <script type="module" src="./image-test.js"></script>
+</body>
+</html>

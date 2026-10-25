@@ -1,0 +1,238 @@
+/* Reset, base type and page layout. Colours and sizes come from tokens.css. */
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, ul {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+/* flex: none stops icons from being squashed inside flex rows. */
+svg {
+  display: block;
+  flex: none;
+}
+
+/* The hidden attribute must always win, even over display rules below. */
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Keyboard focus ---------- */
+/* One clear ring on everything. :focus-visible shows it for keyboard users
+   (and after script moves focus) but not after a plain mouse click. */
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ---------- Skip link ---------- */
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  z-index: 200;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+/* ---------- Layout ---------- */
+
+.container {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Keep text pages easy to read. Must stay below .container. */
+.page-narrow {
+  max-width: 44rem;
+}
+
+.site-main {
+  flex: 1 0 auto;
+  padding-block: var(--space-8) var(--space-12);
+}
+
+/* ---------- Header (sticky, glass) ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* Solid fallback for browsers without backdrop-filter */
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+  }
+}
+
+/* Small screens: logo and actions on the first row, nav on a second row.
+   At 360 px wide everything fits without scrolling sideways. */
+.header-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "brand actions"
+    "nav   nav";
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding-block: var(--space-2);
+}
+
+.brand {
+  grid-area: brand;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-h);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.site-nav {
+  grid-area: nav;
+  display: flex;
+  gap: var(--space-1);
+}
+
+.site-nav .nav-btn {
+  flex: 1 1 0;
+}
+
+.header-actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Wider screens: one row. Logo left, nav in the middle, actions right. */
+@media (min-width: 48rem) {
+  .header-inner {
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: "brand nav actions";
+  }
+
+  .site-nav {
+    justify-self: center;
+  }
+
+  .site-nav .nav-btn {
+    flex: 0 0 auto;
+  }
+
+  .header-actions {
+    justify-self: end;
+  }
+}
+
+/* ---------- Pages ---------- */
+
+.page-title {
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.hero {
+  padding-block: var(--space-4) var(--space-8);
+  text-align: center;
+}
+
+.hero-title {
+  font-size: var(--fs-hero);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+/* Gradient text. The text itself stays real text, so screen readers read it. */
+.hero-accent {
+  background: var(--accent-text-bg);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* In high-contrast mode the system colours must win or the text would vanish. */
+@media (forced-colors: active) {
+  .hero-accent {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  padding-block: var(--space-6);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}

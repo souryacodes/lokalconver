@@ -1,0 +1,106 @@
+/* Design tokens: every colour, radius, space and timing lives here.
+   Nothing else in the CSS should use a raw colour or a magic number.
+   The theme is chosen by data-theme="dark" or data-theme="light" on <html>.
+   Colours come from PROJECT_BRIEF.md. */
+
+/* Same in both themes */
+:root {
+  /* Accent and status colours */
+  --accent-from: #7C5CFF;
+  --accent-to: #22D3EE;
+  --accent-gradient: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  /* Dark ink for text and icons that sit on the gradient or on --success.
+     It has enough contrast on both. White would not. */
+  --on-accent: #07090F;
+
+  /* Radii (cards use 16-20 px) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Spacing: a 4 px grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Motion (brief: 150-250 ms) */
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-slow: 250ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: clamp(1.5rem, 1.1rem + 2vw, 2rem);
+  --fs-hero: clamp(2rem, 1.2rem + 4vw, 3.75rem);
+
+  /* Layout */
+  --content-max: 68rem;
+  --gutter: var(--space-4);
+  --control-h: 40px; /* height of header buttons: easy to tap */
+
+  /* Keyboard focus ring */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+}
+
+/* Dark is the default, even if data-theme is missing. */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #07090F;
+  --surface: #0F1424;
+  --surface-2: #151B30;
+  --border: #222A45;
+  --text: #EDEFF8;
+  --muted: #8E97B8;
+
+  /* Made from the colours above, for things the brief does not name */
+  --border-strong: rgba(142, 151, 184, 0.5);  /* muted at 50%: dashed drop area */
+  --accent-soft: rgba(124, 92, 255, 0.14);    /* accent at 14%: soft glow */
+  --glass-bg: rgba(7, 9, 15, 0.72);           /* bg at 72%: glass top bar */
+  --focus: #22D3EE;
+  --accent-text-bg: var(--accent-gradient);   /* gradient headline text */
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F6F7FB;
+  --surface: #FFFFFF;
+  /* The brief gives no light surface-2. This is a step between bg and border. */
+  --surface-2: #EDEFF8;
+  --border: #E3E6F2;
+  --text: #0E1330;
+  --muted: #5A6385;
+
+  --border-strong: rgba(90, 99, 133, 0.5);
+  --accent-soft: rgba(124, 92, 255, 0.1);
+  --glass-bg: rgba(246, 247, 251, 0.78);
+  --focus: #7C5CFF; /* the cyan end of the gradient is too pale on a light page */
+  /* Same reason: on light, headline accent text is solid violet, not gradient */
+  --accent-text-bg: linear-gradient(var(--accent-from), var(--accent-from));
+}
+
+/* Respect the visitor's "reduce motion" setting: all timings become instant. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

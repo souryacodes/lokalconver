@@ -254,5 +254,8 @@ export function growNote(fromExt, toExt, bytesIn, bytesOut) {
   if (!(bytesOut > bytesIn)) return '';
   if (fromExt === 'svg') return 'A vector picture becomes pixels, so the file can be larger.';
   if (['png', 'bmp', 'ico'].includes(toExt)) return `${toExt.toUpperCase()} keeps every pixel exact, so it is often larger. JPG or WEBP are smaller.`;
-  return 'This file is larger than the original. Try a lower quality next time.';
+  // The quality advice only makes sense for pictures. A Markdown file that becomes
+  // an HTML page, or text that becomes a PDF, is simply bigger and needs no tip.
+  if (isImageExt(fromExt) && isImageExt(toExt)) return 'This file is larger than the original. Try a lower quality next time.';
+  return '';
 }

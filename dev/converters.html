@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Strict policy: only files from this site, no inline scripts, no network calls. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>LokalConver: document and data converters (test page)</title>
+<link rel="stylesheet" href="../css/docs.css">
+<link rel="stylesheet" href="./dev.css">
+</head>
+<body class="lc-scope">
+<main>
+  <h1>Document and data converters</h1>
+  <p class="lc-muted">A plain test page for these modules. The real app shell can mount the same two functions.</p>
+  <div id="docs"></div>
+  <div id="fingerprint"></div>
+</main>
+<script type="module" src="./converters.js"></script>
+</body>
+</html>

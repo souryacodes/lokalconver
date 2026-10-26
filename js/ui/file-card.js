@@ -180,6 +180,7 @@ export function createCard(item, handlers) {
     ];
     const note = growNote(item.fromExt, item.target, job.bytesIn, job.bytesOut);
     if (note) parts.push(el('p', { class: 'cv-note', text: note }));
+    for (const text of item.notes ?? []) parts.push(el('p', { class: 'cv-note', text: text }));
 
     if (isImageExt(item.fromExt) && isImageExt(item.target)) {
       const host = el('div', { class: 'cv-compare-host' }, el('div', { class: 'cv-skeleton cv-compare__skeleton', 'aria-hidden': 'true' }));

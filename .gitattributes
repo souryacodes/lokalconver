@@ -1,0 +1,5 @@
+# Vendored libraries must never be changed by line-ending conversion, or their
+# SHA-256 hashes (js/vendor/SHA256SUMS) stop matching on Windows.
+js/vendor/** -text
+samples/*.docx binary
+samples/*.xlsx binary

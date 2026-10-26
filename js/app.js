@@ -16,6 +16,7 @@ async function startConvertPage() {
       import('./ui/services.js'),
       import('./core/registry.js'),
       import('./converters/image.js'), // registers the image converters
+      import('./converters/docs.js'), // registers the document and data converters
     ]);
     mountConvertPage(root, createConvertServices(registry));
     document.documentElement.setAttribute('data-ready', ''); // js/file-check.js watches for this

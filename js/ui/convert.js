@@ -262,6 +262,7 @@ export function mountConvertPage(root, services) {
       item.progress = 0;
       item.phase = '';
       item.error = '';
+      item.notes = [];
       item.revealed = false;
       item.job = {
         id: `j${++seq}`, file: item.file, fromExt: item.fromExt, toExt: item.target,
@@ -314,6 +315,8 @@ export function mountConvertPage(root, services) {
       job.resultBlob = blob;
       job.bytesOut = blob.size;
       job.progress = item.progress = 1;
+      // Plain facts the converter wants the visitor to know (for example "3 images were left out").
+      item.notes = Array.isArray(job.warnings) ? job.warnings.filter((w) => typeof w === 'string' && w) : [];
       item.outName = replaceExt(item.name, item.target);
       setState(item, 'done');
       finishedFeeling(item);

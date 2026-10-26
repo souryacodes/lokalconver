@@ -24,6 +24,8 @@ export function raceAbort(promise, signal) {
 // Show the converter's own message when it is short and readable.
 // Otherwise say something plain. Never show a stack trace to a visitor.
 export function friendlyError(err) {
+  // A ConvertError carries a message written for the visitor. Use it as it is, even when it is long.
+  if (typeof err?.userMessage === 'string' && err.userMessage.trim()) return err.userMessage.trim();
   const message = typeof err?.message === 'string' ? err.message.trim() : '';
   if (message && message.length <= 140 && !/\n|\bat .*:\d+/.test(message)) return message;
   return 'Something went wrong while converting this file. You can try again.';

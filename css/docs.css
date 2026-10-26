@@ -1,0 +1,56 @@
+/* Styles for the document converters and the File Fingerprint tool. Everything is prefixed lc- .
+   Colours come from the brief. If the app already defines --bg, --surface ... those win. */
+.lc-scope{--lc-bg:var(--bg,#07090F);--lc-surface:var(--surface,#0F1424);--lc-surface2:var(--surface-2,#151B30);--lc-border:var(--border,#222A45);
+  --lc-text:var(--text,#EDEFF8);--lc-muted:var(--muted,#8E97B8);--lc-ok:var(--success,#34D399);--lc-warn:var(--warning,#FBBF24);--lc-bad:var(--danger,#F87171);
+  --lc-accent:var(--accent-1,#7C5CFF);--lc-accent2:var(--accent-2,#22D3EE);
+  color:var(--lc-text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:light){.lc-scope.lc-auto{--lc-bg:#F6F7FB;--lc-surface:#FFFFFF;--lc-surface2:#F6F7FB;--lc-border:#E3E6F2;--lc-text:#0E1330;--lc-muted:#5A6385}}
+.lc-scope *{box-sizing:border-box}
+.lc-section{margin:0 0 32px}
+.lc-section h2{font-size:1.25rem;margin:0 0 4px}
+.lc-muted{color:var(--lc-muted);margin:0 0 16px;font-size:.9375rem}
+.lc-card{background:var(--lc-surface);border:1px solid var(--lc-border);border-radius:16px;padding:16px;margin:12px 0}
+
+.lc-drop{display:block;position:relative;border:2px dashed var(--lc-border);border-radius:16px;padding:28px 16px;text-align:center;background:var(--lc-surface);cursor:pointer;transition:border-color 150ms,background 150ms}
+.lc-drop:hover,.lc-drop.is-over{border-color:var(--lc-accent);background:var(--lc-surface2)}
+.lc-drop:focus-within{outline:3px solid var(--lc-accent2);outline-offset:2px}
+.lc-drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.lc-drop strong{display:block;font-size:1.0625rem}
+.lc-drop span{color:var(--lc-muted);font-size:.875rem}
+
+.lc-list{list-style:none;margin:0;padding:0}
+.lc-file-head{display:flex;gap:8px 12px;justify-content:space-between;align-items:baseline;flex-wrap:wrap}
+.lc-name{font-weight:600;overflow-wrap:anywhere}
+.lc-size{color:var(--lc-muted);font-size:.875rem}
+.lc-label{color:var(--lc-muted);font-size:.875rem;margin:12px 0 8px}
+.lc-targets{display:flex;flex-wrap:wrap;gap:8px}
+.lc-bridge{margin:8px 0 0;padding:8px 12px;border:1px dashed var(--lc-border);border-radius:12px;color:var(--lc-muted);font-size:.875rem}
+.lc-badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--lc-surface2);border:1px solid var(--lc-warn);color:var(--lc-warn);font-size:.8125rem;white-space:normal}
+
+.lc-btn{font:inherit;min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid var(--lc-border);background:var(--lc-surface2);color:var(--lc-text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:border-color 150ms}
+.lc-btn:hover:not([disabled]){border-color:var(--lc-accent)}
+.lc-btn:focus-visible,.lc-hash:focus-visible,.lc-input:focus-visible,.lc-preview:focus-visible,.lc-opt input:focus-visible,.lc-select:focus-visible{outline:3px solid var(--lc-accent2);outline-offset:2px}
+.lc-btn[disabled]{opacity:.55;cursor:not-allowed}
+.lc-btn--primary{border:0;color:#fff;background:linear-gradient(135deg,#7C5CFF,#22D3EE);font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.lc-opt{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:.875rem;color:var(--lc-muted)}
+.lc-opt input{margin-top:3px;width:18px;height:18px;flex:none}
+
+.lc-status{margin:12px 0 0;font-size:.9375rem}
+.lc-progress{width:100%;height:6px;margin:8px 0}
+.lc-error{margin:12px 0 0;padding:12px;border-radius:12px;border:1px solid var(--lc-bad);color:var(--lc-bad)}
+.lc-done{color:var(--lc-ok);font-weight:600}
+.lc-warns{margin:8px 0 0;padding-left:20px;color:var(--lc-warn);font-size:.875rem}
+.lc-note{margin:8px 0 0;color:var(--lc-muted);font-size:.875rem}
+.lc-preview{margin:12px 0 0;padding:12px;overflow:auto;max-height:16rem;background:var(--lc-bg);border:1px solid var(--lc-border);border-radius:12px;font:13px/1.5 ui-monospace,Consolas,monospace;white-space:pre}
+.lc-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.lc-select{font:inherit;min-height:44px;padding:8px;border-radius:12px;border:1px solid var(--lc-border);background:var(--lc-surface2);color:var(--lc-text);max-width:100%}
+
+.lc-hash{display:block;margin:8px 0;padding:12px;background:var(--lc-bg);border:1px solid var(--lc-border);border-radius:12px;font:14px/1.5 ui-monospace,Consolas,monospace;overflow-wrap:anywhere;word-break:break-all}
+.lc-input{width:100%;min-height:44px;padding:8px 12px;border-radius:12px;border:1px solid var(--lc-border);background:var(--lc-bg);color:var(--lc-text);font:14px ui-monospace,Consolas,monospace}
+.lc-verdict{margin:12px 0 0;padding:12px;border-radius:12px;border:1px solid var(--lc-border);min-height:3rem}
+.lc-verdict b{font-size:1.125rem}
+.lc-verdict.is-match{border-color:var(--lc-ok);color:var(--lc-ok)}
+.lc-verdict.is-different,.lc-verdict.is-invalid{border-color:var(--lc-bad);color:var(--lc-bad)}
+.lc-field label{display:block;margin:16px 0 4px;font-weight:600}
+@media (max-width:400px){.lc-card{padding:12px}.lc-btn{flex:1 1 auto;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.lc-scope *{transition:none!important;animation:none!important}}

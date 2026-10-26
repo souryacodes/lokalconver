@@ -57,4 +57,8 @@ test('growNote explains growth honestly and stays silent otherwise', () => {
   assert.match(growNote('svg', 'png', 167, 30000), /vector/i);
   assert.match(growNote('jpg', 'png', 100, 400), /PNG keeps every pixel/);
   assert.match(growNote('jpg', 'webp', 100, 120), /lower quality/);
+  // the quality tip is for pictures only
+  assert.equal(growNote('md', 'html', 100, 900), '');
+  assert.equal(growNote('txt', 'pdf', 100, 900), '');
+  assert.equal(growNote('csv', 'json', 100, 900), '');
 });

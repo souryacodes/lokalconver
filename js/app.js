@@ -5,6 +5,29 @@ import { initThemeToggle } from './theme.js';
 
 const DEFAULT_ROUTE = 'convert';
 
+// The Convert page is loaded after the first paint, so the first load stays small.
+// If it fails to load, the visitor sees a plain message, not a blank page.
+async function startConvertPage() {
+  const root = document.getElementById('convert-root');
+  if (!root) return;
+  try {
+    const [{ mountConvertPage }, { createConvertServices }, registry] = await Promise.all([
+      import('./ui/convert.js'),
+      import('./ui/services.js'),
+      import('./core/registry.js'),
+      import('./converters/image.js'), // registers the image converters
+    ]);
+    mountConvertPage(root, createConvertServices(registry));
+    document.documentElement.setAttribute('data-ready', ''); // js/file-check.js watches for this
+  } catch (err) {
+    console.error('Convert page failed to start', err);
+    const message = document.createElement('p');
+    message.className = 'convert-loading';
+    message.textContent = 'The converter could not start. Please reload the page.';
+    root.replaceChildren(message);
+  }
+}
+
 // route name -> its <section>. The HTML decides which pages exist
 // (each section has data-page="..."). We build this map once.
 const pages = new Map();
@@ -74,4 +97,5 @@ document.querySelector('.skip-link')?.addEventListener('click', (event) => {
 window.addEventListener('hashchange', () => handleRouteChange(true));
 
 handleRouteChange(false);
+startConvertPage();
 initThemeToggle(document.getElementById('theme-toggle'));

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "python tools/serve.py",
     "test": "node --test"
   }
 }

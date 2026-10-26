@@ -43,10 +43,12 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/convert.css">
 
   <!-- Tiny plain script that sets the theme before the page is drawn, so the
        visitor never sees a flash of the wrong theme. -->
   <script src="./js/theme-init.js"></script>
+  <script src="./js/file-check.js"></script>
   <script type="module" src="./js/app.js"></script>
 </head>
 <body>
@@ -109,20 +111,9 @@
 
     <section id="page-convert" class="page" data-page="convert" data-title="LokalConver - Convert anything. Upload nothing.">
       <div class="container">
-        <div class="hero">
-          <h1 class="hero-title" tabindex="-1">Convert anything. <span class="hero-accent">Upload nothing.</span></h1>
-        </div>
-
-        <!-- Placeholder only. The real drop area comes in a later step. -->
-        <div class="dropzone">
-          <span class="dropzone-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
-            </svg>
-          </span>
-          <p class="dropzone-title">Drop files here</p>
-          <p class="dropzone-note">This is a placeholder. File conversion is not built yet.</p>
-        </div>
+        <!-- js/ui/convert.js builds the whole Convert page in here, on first visit. -->
+        <div id="convert-root"><p class="convert-loading">Getting the converter ready...</p>
+          <noscript><p class="convert-loading">LokalConver needs JavaScript to convert files on your device.</p></noscript></div>
 
         <ul class="chip-row" role="list" aria-label="Our promises">
           <li class="chip">
@@ -144,7 +135,7 @@
               <circle class="icon-success-fill" cx="12" cy="12" r="10"/>
               <path class="icon-on-accent-stroke" d="m7.5 12.3 3 3 6-6.3" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span>No limits</span>
+            <span>No hidden limits</span>
           </li>
         </ul>
       </div>

@@ -10,6 +10,7 @@ version.
 | Library | Version | Licence | Where | Loaded |
 |---|---|---|---|---|
 | heic-to (contains libheif) | 1.5.2 | LGPL-3.0 (not MIT) | `js/vendor/heic-to-1.5.2/heic-to.js` | lazily, only for HEIC/HEIF, never edited |
+| fflate | 0.8.3 | MIT | `js/vendor/fflate-0.8.3.js` | lazily, only when someone downloads a ZIP |
 
 ## heic-to
 
@@ -30,6 +31,16 @@ How we keep to the LGPL:
 - It is only downloaded when someone converts a HEIC/HEIF photo in a browser
   that cannot open HEIC by itself. It comes from this same site, not from a
   third party. The photo itself never leaves the device.
+
+## fflate
+
+- What it does: builds the ZIP file for "Download all as ZIP".
+- Source: https://github.com/101arrowz/fflate
+- Package: https://www.npmjs.com/package/fflate
+- Licence text: `js/vendor/fflate-0.8.3.LICENSE.txt` (MIT)
+- It is kept exactly as published and loaded with `import()` only when the
+  ZIP button is used. It runs on the main thread in short steps, so it
+  needs no Web Worker and no extra Content-Security-Policy rule.
 
 ## How to add a library
 

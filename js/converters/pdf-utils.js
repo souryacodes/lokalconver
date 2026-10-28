@@ -13,6 +13,7 @@ export class PdfError extends Error {
     super(message, options);
     this.name = 'PdfError';
     this.code = code;
+    this.userMessage = message; // the Convert page shows this text as it is
   }
 }
 

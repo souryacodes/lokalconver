@@ -48,6 +48,9 @@ def test_check_all_finds_changed_and_missing(tmp_path: Path, monkeypatch: pytest
     (tmp_path / "js" / "vendor").mkdir(parents=True)
     (tmp_path / "js" / "vendor" / "a.js").write_bytes(b"one")
     monkeypatch.setattr(v, "ROOT", tmp_path)
+    monkeypatch.setattr(v, "VENDOR", tmp_path / "js" / "vendor")  # the script computes these from ROOT once, at import
+    monkeypatch.setattr(v, "SUMS", tmp_path / "js" / "vendor" / "SHA256SUMS")
+    monkeypatch.setattr(v, "REQUIRED_FILES", ())
     ok = {"js/vendor/a.js": v.sha256_hex(b"one")}
     assert v.check_all(ok) == []
     bad = {"js/vendor/a.js": "0" * 64, "js/vendor/gone.js": "1" * 64}

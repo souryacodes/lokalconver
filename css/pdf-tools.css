@@ -1,0 +1,23 @@
+/* The PDF tools page (js/ui/pdf-tools.js). It reuses the .cv-* pieces of convert.css. */
+
+.pt { padding-inline: 0; padding-top: 0; }
+.pt .cv-lead { margin-bottom: 16px; }
+.pt-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.pt-tool[aria-pressed="true"] {
+  border-color: var(--cv-accent-2); color: var(--cv-text);
+  background: color-mix(in srgb, var(--cv-accent-1) 18%, var(--cv-surface));
+}
+.pt-panel {
+  display: grid; gap: 16px; padding: 20px; border: 1px solid var(--cv-border);
+  border-radius: 20px; background: var(--cv-surface);
+}
+.pt-panel.is-over { border-color: var(--cv-accent-2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cv-accent-2) 30%, transparent); }
+.pt-title { margin: 0; font-size: 1.25rem; }
+.pt-sub { margin: 0; font-size: 0.875rem; color: var(--cv-muted); }
+.pt-drop { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pt-file { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 12px; border: 1px solid var(--cv-border); border-radius: 16px; background: var(--cv-surface-2); }
+.pt-file__text { flex: 1; min-width: 0; display: grid; }
+.pt-file__name { overflow-wrap: anywhere; font-weight: 600; }
+.pt-settings { display: grid; gap: 8px; border-top: 1px solid var(--cv-border); padding-top: 12px; }
+.pt-result { padding-top: 4px; }
+.pt .reorder { --reorder-surface: var(--cv-surface-2); --reorder-border: var(--cv-border); --reorder-text: var(--cv-text); --reorder-muted: var(--cv-muted); }

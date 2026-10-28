@@ -40,10 +40,16 @@
   <title>LokalConver - Convert anything. Upload nothing.</title>
 
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/components.css">
   <link rel="stylesheet" href="./css/convert.css">
+  <link rel="stylesheet" href="./css/local-features.css">
+  <link rel="stylesheet" href="./css/reorder-list.css">
+  <link rel="stylesheet" href="./css/pdf-tools.css">
+  <link rel="stylesheet" href="./css/pwa.css">
 
   <!-- Tiny plain script that sets the theme before the page is drawn, so the
        visitor never sees a flash of the wrong theme. -->
@@ -75,19 +81,30 @@
 
       <nav class="site-nav" aria-label="Main">
         <button type="button" class="nav-btn" data-route="convert">Convert</button>
+        <button type="button" class="nav-btn" data-route="pdf" aria-label="PDF tools">PDF</button>
         <button type="button" class="nav-btn" data-route="presets">Presets</button>
         <button type="button" class="nav-btn" data-route="proof">Proof</button>
         <button type="button" class="nav-btn" data-route="about">About</button>
       </nav>
 
       <div class="header-actions">
-        <!-- Becomes the Privacy Proof button in S8. For now it opens the Proof page. -->
+        <!-- The privacy shield. It opens the Proof page. -->
         <button type="button" class="chip chip-button" data-route="proof" aria-label="Private. Open the Proof page.">
           <svg class="chip-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path class="icon-success-fill" d="M12 2.5 4.5 5.5v6c0 4.7 3.1 8.2 7.5 10 4.4-1.8 7.5-5.3 7.5-10v-6z"/>
             <path class="icon-on-accent-stroke" d="m8.8 12.2 2.2 2.2 4.2-4.4" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span>Private</span>
+        </button>
+
+        <!-- Opens the Settings dialog. js/app.js loads the dialog code on the first click. -->
+        <button type="button" class="icon-btn" id="settings-btn" aria-label="Settings" title="Settings" aria-haspopup="dialog">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h10M18 18h2"/>
+            <circle cx="14" cy="6" r="2"/>
+            <circle cx="8" cy="12" r="2"/>
+            <circle cx="16" cy="18" r="2"/>
+          </svg>
         </button>
 
         <!-- The label is kept up to date by js/theme.js. -->
@@ -141,21 +158,27 @@
       </div>
     </section>
 
+    <section id="page-pdf" class="page" data-page="pdf" data-title="PDF tools - LokalConver" hidden>
+      <div class="container page-narrow">
+        <h1 class="page-title" tabindex="-1">PDF tools</h1>
+        <!-- js/ui/pdf-tools.js builds the tools in here, the first time you open this page. -->
+        <div id="pdf-root"><noscript><p>The PDF tools need JavaScript.</p></noscript></div>
+      </div>
+    </section>
+
     <section id="page-presets" class="page" data-page="presets" data-title="Presets - LokalConver" hidden>
       <div class="container page-narrow">
         <h1 class="page-title" tabindex="-1">Presets</h1>
-        <div class="card">
-          <p>Presets are not built yet. They will give one-tap settings, such as a size limit for a form upload.</p>
-        </div>
+        <!-- js/ui/presets-page.js builds the page in here, each time you open it. -->
+        <div id="presets-root"><noscript><p>Presets need JavaScript.</p></noscript></div>
       </div>
     </section>
 
     <section id="page-proof" class="page" data-page="proof" data-title="Proof - LokalConver" hidden>
       <div class="container page-narrow">
         <h1 class="page-title" tabindex="-1">Proof</h1>
-        <div class="card">
-          <p>This page is not built yet. It will show how you can check for yourself that your files stay on your device.</p>
-        </div>
+        <!-- js/ui/proof.js builds the page in here, each time you open it. -->
+        <div id="proof-root"><noscript><p>The Proof page needs JavaScript.</p></noscript></div>
       </div>
     </section>
 
@@ -174,6 +197,8 @@
   <footer class="site-footer">
     <div class="container">
       <p>Your files never leave this device</p>
+      <!-- js/core/pwa.js puts the "Works offline" / "Offline" chip here. -->
+      <div class="pwa-chip-slot" data-pwa-chip-slot role="status"></div>
     </div>
   </footer>
 </body>

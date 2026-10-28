@@ -17,6 +17,7 @@ import { attachDropTarget, attachPaste, entriesFromInput } from './drop.js';
 import { createCard } from './file-card.js';
 import { createSound, haptic } from './feedback.js';
 import { buildZip } from './zip.js';
+import { splitBatchBudget } from '../presets.js';
 import { friendlyError, raceAbort } from './jobs.js';
 import {
   dirOf, extOf, formatBytes, jobOptions, normalizeSuggestion, pickPrimary, replaceExt, resolveType,
@@ -30,7 +31,13 @@ const RETRYABLE = ['ready', 'error', 'cancelled'];
 
 export function mountConvertPage(root, services) {
   const reduceQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-  const reduced = () => Boolean(reduceQuery?.matches);
+  // Settings can force motion on or off (data-motion on <html>). Otherwise we follow the system.
+  const reduced = () => {
+    const choice = document.documentElement.dataset.motion;
+    if (choice === 'reduce') return true;
+    if (choice === 'allow') return false;
+    return Boolean(reduceQuery?.matches);
+  };
 
   const items = [];          // every card on the page, in the order added
   const queue = [];          // items waiting for a free slot
@@ -38,6 +45,8 @@ export function mountConvertPage(root, services) {
   let batch = { total: 0, finished: 0 };
   let zipping = false;
   let seq = 0;
+  let activePreset = null;  // chosen on the Presets page; applied to files that can use it
+  let batchJobs = [];       // the jobs of the current batch, for the receipt and the personal stats
 
   // ---------- page skeleton (built with createElement, never innerHTML) ----------
 
@@ -68,9 +77,14 @@ export function mountConvertPage(root, services) {
   const cancelAllBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Cancel all', onclick: () => cancelAll() });
   const clearBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Clear', onclick: () => clearAll() });
   const zipBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', onclick: () => downloadZip() });
+  const receiptBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Make a receipt', hidden: true, onclick: () => makeReceiptNow() });
   const convertBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', onclick: () => convertAll() });
   const toolbar = el('div', { class: 'cv-toolbar', hidden: true }, summary,
-    el('div', { class: 'cv-toolbar__actions' }, addBtn, addFolderBtn, cancelAllBtn, clearBtn, zipBtn, convertBtn));
+    el('div', { class: 'cv-toolbar__actions' }, addBtn, addFolderBtn, cancelAllBtn, clearBtn, zipBtn, receiptBtn, convertBtn));
+
+  const presetText = el('p', { class: 'cv-presetbar__text', role: 'status' });
+  const presetClear = el('button', { class: 'cv-linkbtn', type: 'button', text: 'Stop using preset', onclick: () => setPreset(null) });
+  const presetBar = el('div', { class: 'cv-presetbar', hidden: true }, presetText, presetClear);
 
   const queueList = el('ul', { class: 'cv-list' });
   const queueSection = el('section', { class: 'cv-queue', 'aria-labelledby': 'cv-queue-title', hidden: true },
@@ -100,7 +114,7 @@ export function mountConvertPage(root, services) {
   root.replaceChildren(
     el('h1', { class: 'cv-title', tabindex: '-1', text: 'Convert anything. Upload nothing.' }),
     el('p', { class: 'cv-lead', text: 'Drop your files anywhere on this page. They are converted on your device.' }),
-    empty, toolbar, queueSection, shelf, foot,
+    presetBar, empty, toolbar, queueSection, shelf, foot,
     overlay, toastHost, live, shortcuts.element, fileInput, folderInput);
 
   const announce = (text) => { live.textContent = ''; setTimeout(() => { live.textContent = text; }, 30); };
@@ -110,6 +124,63 @@ export function mountConvertPage(root, services) {
     soundBtn.textContent = sound.enabled ? 'Sound when done: on' : 'Sound when done: off';
   }
   paintSound();
+  const onSettingsChanged = () => { sound.refresh(); paintSound(); };
+  window.addEventListener('lokalconver:settings-changed', onSettingsChanged);
+
+  // ---------- presets ----------
+  // A preset says "make it this format, this size". We only apply it to files that can really do it,
+  // and we say how many could not. Nothing is promised that the converter cannot do.
+
+  function presetTargetFor(item, preset) {
+    const want = preset.toExt === 'original' ? item.fromExt : preset.toExt;
+    // A JPG that must become a smaller JPG is not in the normal target list. Presets may shrink it.
+    if (!item.targets.includes(want)) {
+      if (want !== item.fromExt || !services.findShrinker?.(want)) return '';
+      item.targets = [...item.targets, want];
+    }
+    // Only the image converters can aim for a size. A PDF made from pictures has no size target here.
+    if (preset.kind === 'target-size' && want === 'pdf' && item.fromExt !== 'pdf') return '';
+    return want;
+  }
+
+  function applyActivePreset() {
+    const preset = activePreset;
+    if (!preset) return { applied: 0, skipped: 0 };
+    const eligible = items.filter((item) => RETRYABLE.includes(item.state) && item.targets.length);
+    // "Total under N MB" is shared out across the batch. Other presets give every file the same limit.
+    const isTotal = preset.group === 'Email-friendly' && preset.maxKB;
+    const budgets = isTotal ? splitBatchBudget(preset.maxKB, eligible.map((item) => item.file.size)) : eligible.map(() => preset.maxKB ?? null);
+    let applied = 0;
+    eligible.forEach((item, i) => {
+      const target = presetTargetFor(item, preset);
+      if (!target) { item.presetSkipped = true; return; }
+      item.presetSkipped = false;
+      item.target = target;
+      const patch = { maxWidth: preset.maxWidth ?? null, maxKB: budgets[i] };
+      if (preset.kind === 'format' && preset.quality) patch.quality = preset.quality;
+      Object.assign(item.options, patch);
+      refreshEngine(item);
+      item.card.render();
+      applied++;
+    });
+    return { applied, skipped: eligible.length - applied };
+  }
+
+  function paintPresetBar(result) {
+    presetBar.hidden = !activePreset;
+    if (!activePreset) return;
+    const { applied, skipped } = result || { applied: 0, skipped: 0 };
+    const parts = [`Preset: ${activePreset.label}.`];
+    if (applied) parts.push(`Applied to ${applied} ${applied === 1 ? 'file' : 'files'}.`);
+    if (skipped) parts.push(`${skipped} ${skipped === 1 ? 'file was' : 'files were'} left as they were, because this preset cannot be made from ${skipped === 1 ? 'its' : 'their'} type here.`);
+    if (!applied && !skipped) parts.push('Add files to use it.');
+    presetText.textContent = parts.join(' ');
+  }
+
+  function setPreset(preset) {
+    activePreset = preset ? { ...preset } : null;
+    paintPresetBar(applyActivePreset());
+  }
 
   // ---------- adding files ----------
 
@@ -132,8 +203,8 @@ export function mountConvertPage(root, services) {
       id: `f${++seq}`, file, name: file.name, path, folder: dirOf(path),
       state: 'loading', fromExt: '', typeLabel: '', mismatch: '',
       targets: [], target: '', suggested: '', engine: null,
-      options: { quality: 0.85, maxWidth: null, maxKB: null, stripMetadata: true },
-      optionsOpen: false, job: null, controller: null, converter: null,
+      options: { quality: 0.85, maxWidth: null, maxKB: null, stripMetadata: true, extra: {} },
+      optionSpec: null, optionsOpen: false, job: null, controller: null, converter: null,
       progress: 0, phase: '', error: '', outName: '', revealed: false,
     };
     item.card = createCard(item, handlers);
@@ -146,6 +217,9 @@ export function mountConvertPage(root, services) {
     let downloadKB = 0;
     try { downloadKB = converter?.estimate?.(item.file)?.downloadKB ?? 0; } catch { /* no estimate: show what we know */ }
     item.engine = converter ? describeEngine(converter.engine, downloadKB) : null;
+    // Converters with settings of their own (the PDF tools) describe them as a list. The card draws it.
+    item.optionSpec = Array.isArray(converter?.options) && converter.options.length ? converter.options : null;
+    item.options.extra = {}; // settings of another converter do not carry over when the format changes
   }
 
   // Look at the first bytes, decide the real type, ask for the suggestion.
@@ -172,6 +246,7 @@ export function mountConvertPage(root, services) {
     refreshEngine(item);
     item.state = 'ready';
     item.card.render();
+    if (activePreset) paintPresetBar(applyActivePreset());
     return true;
   }
 
@@ -222,9 +297,12 @@ export function mountConvertPage(root, services) {
   folderInput?.addEventListener('change', () => { addResult(entriesFromInput(folderInput)); folderInput.value = ''; });
 
   const dropError = (err) => { console.error(err); toaster.show('That drop did not work. Try "Choose files" instead.', { kind: 'error' }); };
+  // Drops and pastes are caught on the whole window. When another page (for example PDF tools) is showing,
+  // this page is hidden and must not take the files.
+  const onlyWhenShown = (fn) => (arg) => (root.closest('[hidden]') ? undefined : fn(arg));
   const detachers = [
-    attachDropTarget(overlay, addResult, dropError),
-    attachPaste(addResult),
+    attachDropTarget(overlay, onlyWhenShown(addResult), dropError),
+    attachPaste(onlyWhenShown(addResult)),
   ];
 
   // ---------- converting ----------
@@ -253,7 +331,7 @@ export function mountConvertPage(root, services) {
   function enqueue(list) {
     const todo = list.filter((item) => RETRYABLE.includes(item.state));
     if (!todo.length) return;
-    if (active === 0 && queue.length === 0) batch = { total: 0, finished: 0 };
+    if (active === 0 && queue.length === 0) { batch = { total: 0, finished: 0 }; batchJobs = []; }
     for (const item of todo) {
       const converter = services.findConverter(item.fromExt, item.target);
       if (!converter) { fail(item, `There is no converter for ${item.fromExt.toUpperCase()} to ${item.target.toUpperCase()} yet.`); continue; }
@@ -269,6 +347,7 @@ export function mountConvertPage(root, services) {
         options: jobOptions(item.options), engine: converter.engine, status: 'queued',
         progress: 0, bytesIn: item.file.size, bytesOut: 0, resultBlob: null, error: null,
       };
+      batchJobs.push(item.job);
       queue.push(item);
       batch.total++;
       setState(item, 'queued');
@@ -288,7 +367,7 @@ export function mountConvertPage(root, services) {
       active++;
       execute(item)
         .catch((err) => console.error(err))
-        .finally(() => { active--; batch.finished++; pump(); refresh(); });
+        .finally(() => { active--; batch.finished++; pump(); refresh(); if (active === 0 && queue.length === 0) recordBatch(); });
     }
   }
 
@@ -317,9 +396,12 @@ export function mountConvertPage(root, services) {
       job.progress = item.progress = 1;
       // Plain facts the converter wants the visitor to know (for example "3 images were left out").
       item.notes = Array.isArray(job.warnings) ? job.warnings.filter((w) => typeof w === 'string' && w) : [];
-      item.outName = replaceExt(item.name, item.target);
+      // A converter that makes a ZIP (PDF to images, split into parts) says so in job.outExt.
+      item.outName = replaceExt(item.name, job.outExt || item.target);
       setState(item, 'done');
       finishedFeeling(item);
+      // Tells js/core/pwa.js, which decides when to offer "Install LokalConver".
+      window.dispatchEvent(new CustomEvent('lokalconver:conversion-done'));
     } catch (err) {
       if (controller.signal.aborted || err?.name === 'AbortError') {
         setState(item, 'cancelled');
@@ -336,6 +418,34 @@ export function mountConvertPage(root, services) {
     haptic(30);
     sound.play();
     announce(`${item.outName} is ready. ${revealText(item.job.bytesIn, item.job.bytesOut)}.`);
+  }
+
+  // Personal stats ("files converted", "MB saved") live only in localStorage. Counted once per batch.
+  async function recordBatch() {
+    const jobs = batchJobs.filter((job) => job.status === 'done');
+    if (!jobs.length) return;
+    try {
+      const { recordBatchStats } = await import('./receipt.js');
+      recordBatchStats(jobs, { batchId: globalThis.crypto?.randomUUID?.() ?? `b${Date.now()}-${seq}` });
+    } catch (err) {
+      console.error('Could not save the personal stats', err);
+    }
+  }
+
+  // The receipt uses only the real sizes of the files that finished in this batch.
+  async function makeReceiptNow() {
+    const jobs = batchJobs.filter((job) => job.status === 'done');
+    receiptBtn.disabled = true;
+    try {
+      const { makeReceipt } = await import('./receipt.js');
+      const result = await makeReceipt(jobs);
+      toaster.show(result.action === 'shared' ? 'Receipt shared.' : 'Receipt saved as a PNG.', { kind: 'success' });
+    } catch (err) {
+      if (err?.name === 'AbortError') toaster.show('Sharing cancelled.');
+      else toaster.show(typeof err?.message === 'string' && err.message ? err.message : 'The receipt could not be made.', { kind: 'error' });
+    } finally {
+      receiptBtn.disabled = false;
+    }
   }
 
   function cancelItem(item) {
@@ -407,7 +517,7 @@ export function mountConvertPage(root, services) {
     refresh();
     try {
       // keep folders, fix odd characters, and never let two files share a name
-      const paths = uniquePaths(done.map((item) => safeZipPath(replaceExt(item.path, item.target))));
+      const paths = uniquePaths(done.map((item) => safeZipPath(replaceExt(item.path, item.job?.outExt || item.target))));
       const entries = done.map((item, i) => ({ path: paths[i], blob: item.job.resultBlob }));
       const blob = await buildZip(entries, { onProgress: (p) => { zipBtn.textContent = `Making ZIP\u2026 ${Math.round(p * 100)}%`; } });
       saveBlob(blob, `lokalconver-${stamp()}.zip`);
@@ -442,6 +552,7 @@ export function mountConvertPage(root, services) {
     clearBtn.hidden = count === 0;
     zipBtn.hidden = done.length === 0;
     zipBtn.disabled = zipping;
+    receiptBtn.hidden = done.length === 0 || busy > 0;
     if (!zipping) zipBtn.textContent = 'Download all as ZIP';
     convertBtn.hidden = pending === 0 && busy === 0;
     convertBtn.disabled = busy > 0;
@@ -452,6 +563,7 @@ export function mountConvertPage(root, services) {
     chooseBtn.classList.toggle('cv-btn--primary', primary === 'choose');
     convertBtn.classList.toggle('cv-btn--primary', primary === 'convert-all');
     zipBtn.classList.toggle('cv-btn--primary', primary === 'zip');
+    // The receipt is never the main button: one gradient button per screen.
 
     const sumIn = done.reduce((n, i) => n + i.job.bytesIn, 0);
     const sumOut = done.reduce((n, i) => n + i.job.bytesOut, 0);
@@ -483,9 +595,11 @@ export function mountConvertPage(root, services) {
   refresh();
 
   return {
+    applyPreset: (preset) => setPreset(preset),
     addFiles: (files) => addResult({ entries: Array.from(files, (file) => ({ file, path: file.name })) }),
     destroy() {
       document.removeEventListener('keydown', onKeydown);
+      window.removeEventListener('lokalconver:settings-changed', onSettingsChanged);
       detachers.forEach((off) => off());
       cancelAll();
       items.splice(0).forEach((item) => item.card.destroy());

@@ -35,6 +35,9 @@ export function initThemeToggle(button) {
   // so a visitor who never clicks keeps following their system setting.
   applyTheme(currentTheme(), button);
 
+  // Settings (or "Clear all local data") can change the theme without this button.
+  window.addEventListener('lokalconver:settings-changed', () => applyTheme(currentTheme(), button));
+
   button.addEventListener('click', () => {
     const next = currentTheme() === 'dark' ? 'light' : 'dark';
     applyTheme(next, button);

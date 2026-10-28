@@ -188,7 +188,8 @@ export function optionFields(fromExt, toExt) {
   const fromImage = isImageExt(fromExt);
   return {
     quality: fromImage && ['jpg', 'webp', 'avif'].includes(toExt),
-    resize: fromImage,
+    // Images to PDF has its own settings (page size, margin ...), so the picture-only fields stay away.
+    resize: fromImage && toExt !== 'pdf',
     size: fromImage && ['jpg', 'webp'].includes(toExt),
   };
 }
@@ -245,6 +246,8 @@ export function jobOptions(options) {
   if (Number.isFinite(q)) out.quality = Math.min(100, Math.max(1, Math.round(q <= 1 ? q * 100 : q)));
   if (options.maxWidth) out.maxWidth = options.maxWidth;
   if (options.maxKB) out.maxKB = options.maxKB;
+  // Settings that belong to one converter only (for example the PDF tools), kept apart from the picture settings.
+  if (options.extra && Object.keys(options.extra).length) out.extra = { ...options.extra };
   return out;
 }
 

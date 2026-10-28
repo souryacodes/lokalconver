@@ -53,3 +53,21 @@ Some files cannot be proved from bytes (plain text such as `.csv` or
 - DOCX, XLSX and PPTX are all zip files. We look at the file names
   inside the zip to tell them apart. If we cannot see inside, we use the
   name and tell the user.
+
+# Privacy Proof, Presets, Receipt and Settings
+
+- **Proof (`#/proof`, `js/ui/proof.js`)**: lists the requests the browser reports through the Resource Timing API.
+  Files under `js/vendor/` are shown as engine downloads. Everything else from our own address is "Our own files".
+  The line "Requests that carried your files: 0" is shown only while no request to an unapproved address is reported.
+  Resource Timing cannot see request bodies or methods, so it is a helper, not a proof. The Network tab, airplane mode
+  and `python tools/verify_no_upload.py` are the other checks (`--include-vendor` also scans third-party files).
+- **Presets (`#/presets`, `js/presets.js`)**: plain objects. "My presets" live in localStorage. "Use preset" sets the target,
+  the longest side and the size limit on files that can use it. Other files are left as they were, and the bar says so.
+  A JPG or WEBP can be shrunk in its own format only through a preset (`findShrinker` in `js/ui/services.js`).
+  PDF presets ("PDF under 500 KB") use the PDF compress route (`pdf-compress`, found through `findShrinker` in `js/ui/services.js`).
+  It draws every page again as a picture, so the text can no longer be selected. The card says so, and says honestly when the size goal could not be reached.
+  "Email-friendly: total under 10 MB" shares the total across the batch by file size.
+- **Receipt**: drawn on a canvas from the real sizes of the finished jobs. "0 bytes uploaded" is the product promise printed
+  on the card, not a measured number.
+- **Settings**: theme and sound reuse the existing keys (`lokalconver-theme`, `lokalconver.sound`). Accent and motion are in
+  `lokalconver.settings.v1`. `js/theme-init.js` applies accent and motion before the first paint.

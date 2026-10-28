@@ -59,5 +59,6 @@ export function createSound() {
     get enabled() { return enabled; },
     set(on) { enabled = Boolean(on); writePref(enabled); if (enabled) play(true); },
     play,
+    refresh() { enabled = readPref(); }, // Settings can change the choice
   };
 }

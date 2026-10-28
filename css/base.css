@@ -166,6 +166,25 @@ svg {
   gap: var(--space-2);
 }
 
+/* Very small phones (360 px): the header now has a shield, Settings and theme button.
+   The shield keeps its icon and its accessible name; only the word "Private" is hidden,
+   and the nav buttons use less side padding, so nothing scrolls sideways. */
+@media (max-width: 26rem) {
+  .header-actions .chip-button > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .site-nav .nav-btn {
+    min-width: 0;
+    padding-inline: var(--space-2);
+  }
+}
+
 /* Wider screens: one row. Logo left, nav in the middle, actions right. */
 @media (min-width: 48rem) {
   .header-inner {

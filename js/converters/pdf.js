@@ -1,17 +1,21 @@
 // js/converters/pdf.js
 // The PDF toolkit. Everything runs in the visitor's browser.
 //
-// Tier 1 engines, all loaded lazily with PINNED exact versions:
+// Tier 1 engines, all loaded lazily, PINNED to exact versions and SELF-HOSTED
+// in js/vendor/ (the page's Content-Security-Policy only allows our own files,
+// so nothing is ever fetched from another site):
 //   pdf-lib   (MIT)         build and change PDFs: merge, split, rotate, images to PDF
 //   pdf.js    (Apache-2.0)  read and draw PDFs: to PNG/JPG, to text, compress
 //   fflate    (MIT)         ZIP files for results with many files
 //
-// Nothing here downloads anything when the page loads. A library is fetched
-// the first time a PDF action asks for it (load() or run()).
+// Nothing here loads anything when the page loads. A library is read from
+// js/vendor/ the first time a PDF action asks for it (load() or run()).
 //
 // The pure parts (ranges, page-size maths) live in pdf-utils.js so Node can
 // test them.
 
+import { LIBS, libUrl } from './libs.js';
+import { loadClassicScript } from '../core/lazy.js';
 import {
   PdfError,
   MSG_LOCKED,
@@ -36,44 +40,40 @@ export { PdfError } from './pdf-utils.js';
 
 // ------------------------------------------------------ pinned libraries
 
-// Every version below is an exact number, and each is more than two weeks
-// old (pdfjs-dist 6.4.299 came out on 2026-10-03). To change one, edit the
-// number here AND in docs/LICENSES.md.
-const PDFJS_VERSION = '6.4.299';
-const PDFLIB_VERSION = '1.17.1';
-const FFLATE_VERSION = '0.8.2';
-const CDN = 'https://cdn.jsdelivr.net/npm/';
-
-// Where the files come from. Tests (or a future self-hosted copy) can
-// replace these with configurePdfLibs().
+// The versions and paths live in ONE place, js/converters/libs.js (and in
+// docs/LICENSES.md). To change one, change it there and run tools/vendor_libs.py.
+// All three engines are files of this site under js/vendor/.
 const libUrls = {
-  // Folder with build/, legacy/, cmaps/, standard_fonts/, wasm/, iccs/.
-  pdfjsRoot: `${CDN}pdfjs-dist@${PDFJS_VERSION}/`,
-  pdfLib: `${CDN}pdf-lib@${PDFLIB_VERSION}/dist/pdf-lib.esm.min.js`,
-  fflate: `${CDN}fflate@${FFLATE_VERSION}/esm/browser.js`,
+  // Folder with legacy/build/, cmaps/, standard_fonts/, wasm/ and iccs/.
+  pdfjsRoot: new URL('../../', libUrl('pdfjs')).href,
+  pdfLib: libUrl('pdflib'), // a classic (UMD) script: it sets the global PDFLib
+  fflate: new URL('../vendor/fflate-0.8.3.js', import.meta.url).href, // an ES module
 };
 
-// Download size of each engine over the network, gzip, in KB (measured on
-// the real files). pdf.js is the "legacy" build: about 35 KB bigger than the
-// modern one, but it also runs on older phone browsers.
+// Size of each engine on disk, in KB (the same raw sizes libs.js lists; gzip
+// makes them smaller on the wire). pdf.js also starts its own worker file.
 const LIB_KB = Object.freeze({
-  pdfjs: 542, // pdf.min.mjs 151 + pdf.worker.min.mjs 391
-  pdflib: 206,
-  fflate: 22,
+  pdfjs: LIBS.pdfjs.kb + LIBS.pdfjs.workerKb,
+  pdflib: LIBS.pdflib.kb,
+  fflate: 89,
 });
 
-// Lets tests or a self-hosted copy point at other files. Call it BEFORE the
-// first PDF action. Loaded engines are forgotten so the new URLs are used.
+// Lets tests point at other files, or give their own loader for an engine
+// (overrides.loaders = { pdflib: () => ..., pdfjs: () => ..., fflate: () => ... }).
+// Call it BEFORE the first PDF action. Loaded engines are forgotten.
 export function configurePdfLibs(overrides = {}) {
-  Object.assign(libUrls, overrides);
+  const { loaders, ...urls } = overrides;
+  Object.assign(libUrls, urls);
+  Object.assign(customLoaders, loaders ?? {});
   loading.clear();
   ready.clear();
 }
 
 const loading = new Map(); // name -> Promise of the loaded module
 const ready = new Set(); // names that finished loading (for estimate())
+const customLoaders = {}; // set by configurePdfLibs() in tests
 
-const MSG_LIB = 'Could not load the PDF engine. Check your connection and try again.';
+const MSG_LIB = 'The PDF engine could not be loaded. Reload the page and try again. If it keeps failing, the engine files are missing from this copy of the site.';
 const MSG_BAD_PDF = 'This file is not a PDF I can read. It may be damaged.';
 const MSG_FAILED = 'Something went wrong with this PDF. It may be damaged.';
 
@@ -95,11 +95,12 @@ function loadOnce(name, importer) {
 }
 
 function getPdfLib() {
-  return loadOnce('pdflib', () => import(/* pinned */ libUrls.pdfLib));
+  return loadOnce('pdflib', () => (customLoaders.pdflib ?? (() => loadClassicScript(libUrls.pdfLib, LIBS.pdflib.global)))());
 }
 
 function getPdfJs() {
   return loadOnce('pdfjs', async () => {
+    if (customLoaders.pdfjs) return customLoaders.pdfjs();
     const mod = await import(/* pinned */ `${libUrls.pdfjsRoot}legacy/build/pdf.min.mjs`);
     // pdf.js runs its heavy parsing in its own Web Worker. The worker file
     // must be named explicitly when there is no bundler.
@@ -109,7 +110,7 @@ function getPdfJs() {
 }
 
 function getFflate() {
-  return loadOnce('fflate', () => import(/* pinned */ libUrls.fflate));
+  return loadOnce('fflate', () => (customLoaders.fflate ?? (() => import(/* pinned */ libUrls.fflate)))());
 }
 
 const LOADERS = { pdfjs: getPdfJs, pdflib: getPdfLib, fflate: getFflate };
@@ -187,6 +188,22 @@ function readOptions(spec, given = {}) {
   return out;
 }
 
+// The Convert page gives every job the same generic options, made for pictures
+// (quality as 1-100, maxWidth, maxKB). The PDF tools have their own settings,
+// listed in the OPTIONS_* lists below. Those travel in job.options.extra.
+// Only one generic option is borrowed: maxKB, the size goal that a preset such
+// as "PDF under 500 KB" sets, becomes the target size of "Compress a PDF".
+function settingsFor(job) {
+  return { ...(job.options?.extra ?? {}) };
+}
+
+function compressSettingsFor(job) {
+  const given = settingsFor(job);
+  const goal = Number(job.options?.maxKB);
+  if (given.targetKB === undefined && Number.isFinite(goal) && goal > 0) given.targetKB = goal;
+  return given;
+}
+
 // Files for a job. Merge and images-to-PDF pass the whole ordered list in
 // job.options.files; everything else uses job.file.
 function jobFiles(job) {
@@ -229,12 +246,23 @@ async function openWithPdfLib(file, signal) {
   const lib = await getPdfLib();
   throwIfAborted(signal);
   const bytes = new Uint8Array(await file.arrayBuffer());
+  let doc;
   try {
     // updateMetadata: false keeps the file's own dates and producer.
-    return await lib.PDFDocument.load(bytes, { updateMetadata: false });
+    doc = await lib.PDFDocument.load(bytes, { updateMetadata: false });
   } catch (err) {
     throw toFriendlyError(err, signal);
   }
+  // pdf-lib is forgiving: a damaged file that still starts with "%PDF-" opens as an empty document.
+  // A real PDF always has a page, so no pages means damaged. Better an honest error than an empty result.
+  let pages = 0;
+  try {
+    pages = doc.getPageCount(); // may throw when the page tree is missing
+  } catch (cause) {
+    throw new PdfError('BAD_PDF', MSG_BAD_PDF, { cause });
+  }
+  if (pages === 0) throw new PdfError('BAD_PDF', MSG_BAD_PDF);
+  return doc;
 }
 
 function newPdfLibDocument(lib) {
@@ -480,7 +508,7 @@ async function imageToJpeg(file, { maxSide, quality, background }) {
 
 async function runImagesToPdf(job, onProgress, signal) {
   const files = jobFiles(job);
-  const opts = readOptions(OPTIONS_IMAGES_TO_PDF, job.options);
+  const opts = readOptions(OPTIONS_IMAGES_TO_PDF, settingsFor(job));
   const lib = await getPdfLib();
   const doc = await newPdfLibDocument(lib);
 
@@ -507,7 +535,7 @@ async function runImagesToPdf(job, onProgress, signal) {
 // ------------------------------------------------------ 2. PDF to images
 
 async function runPdfToImages(job, onProgress, signal) {
-  const opts = readOptions(OPTIONS_TO_IMAGES, job.options);
+  const opts = readOptions(OPTIONS_TO_IMAGES, settingsFor(job));
   const isJpg = job.toExt === 'jpg' || job.toExt === 'jpeg';
   const ext = isJpg ? 'jpg' : 'png';
   const mime = isJpg ? 'image/jpeg' : 'image/png';
@@ -520,6 +548,7 @@ async function runPdfToImages(job, onProgress, signal) {
     const zip = createZip(fflate);
     const total = doc.numPages;
     let reducedPages = 0;
+    let onlyImage = null; // a PDF with one page gives that picture itself, not a ZIP with one file
 
     // One page at a time: draw, save to the ZIP, free the canvas pixels.
     for (let n = 1; n <= total; n += 1) {
@@ -529,12 +558,18 @@ async function runPdfToImages(job, onProgress, signal) {
       const { reduced } = await renderPage(page, opts.dpi, canvas, signal);
       if (reduced) reducedPages += 1;
       const blob = await canvasToBlob(canvas, mime, isJpg ? opts.quality : undefined);
-      zip.add(`${base}-page-${padPageNumber(n, total)}.${ext}`, new Uint8Array(await blob.arrayBuffer()));
+      if (total === 1) onlyImage = blob;
+      else zip.add(`${base}-page-${padPageNumber(n, total)}.${ext}`, new Uint8Array(await blob.arrayBuffer()));
       releaseCanvas(canvas);
       await yieldToBrowser();
     }
     if (reducedPages > 0) setInfo(job, { reducedPages });
+    if (onlyImage) {
+      job.outExt = ext;
+      return onlyImage;
+    }
     onProgress(0.98, 'Making the ZIP');
+    job.outExt = 'zip';
     return await zip.done();
   } finally {
     releaseCanvas(canvas);
@@ -574,7 +609,7 @@ async function copyPagesToNewPdf(lib, src, pageNumbers) {
 }
 
 async function runSplit(job, onProgress, signal) {
-  const opts = readOptions(OPTIONS_SPLIT, job.options);
+  const opts = readOptions(OPTIONS_SPLIT, settingsFor(job));
   const lib = await getPdfLib();
   const src = await openWithPdfLib(job.file, signal);
   const total = src.getPageCount();
@@ -590,6 +625,7 @@ async function runSplit(job, onProgress, signal) {
   const fflate = await getFflate();
   const zip = createZip(fflate);
   const base = safeBaseName(job.file?.name);
+  job.outExt = 'zip';
   for (let i = 0; i < groups.length; i += 1) {
     throwIfAborted(signal);
     onProgress(i / groups.length, `Part ${i + 1} of ${groups.length}`);
@@ -601,7 +637,7 @@ async function runSplit(job, onProgress, signal) {
 }
 
 async function runRotate(job, onProgress, signal) {
-  const opts = readOptions(OPTIONS_ROTATE, job.options);
+  const opts = readOptions(OPTIONS_ROTATE, settingsFor(job));
   const lib = await getPdfLib();
   const doc = await openWithPdfLib(job.file, signal);
   const total = doc.getPageCount();
@@ -730,7 +766,7 @@ async function buildCompressed({ doc, lib, plan, canvas, signal, report }) {
 }
 
 async function runCompress(job, onProgress, signal) {
-  const opts = readOptions(OPTIONS_COMPRESS, job.options);
+  const opts = readOptions(OPTIONS_COMPRESS, compressSettingsFor(job));
   const targetBytes = opts.targetKB > 0 ? Math.round(opts.targetKB * 1024) : 0;
   if (targetBytes > 0 && job.file.size <= targetBytes) {
     throw new PdfError('ALREADY_SMALL', 'This PDF is already under that size. Nothing to do.');
@@ -790,6 +826,26 @@ async function runCompress(job, onProgress, signal) {
 
 // ------------------------------------------------------ the converters
 
+// Turn the facts a run collected (job.info) into short true sentences for the
+// card (job.warnings). Nothing is claimed that did not happen.
+function addNotes(job, id) {
+  const notes = Array.isArray(job.warnings) ? job.warnings : [];
+  job.warnings = notes;
+  const info = job.info ?? {};
+  if (info.reducedPages) {
+    const n = info.reducedPages;
+    notes.push(`${n} very large page${n === 1 ? ' was' : 's were'} drawn smaller than asked, to fit what this device can handle.`);
+  }
+  if (id === 'pdf-compress') {
+    if (info.targetKB && info.targetReached) {
+      notes.push(`Reached the ${info.targetKB} KB goal at ${info.dpiUsed} DPI and ${Math.round(info.qualityUsed * 100)}% JPEG quality.`);
+    } else if (info.targetKB) {
+      notes.push(`Could not reach ${info.targetKB} KB. This is the smallest result, at ${info.dpiUsed} DPI and ${Math.round(info.qualityUsed * 100)}% JPEG quality.`);
+    }
+    notes.push('Every page became a picture, so the text can no longer be selected or searched.');
+  }
+}
+
 // Wrap every run so errors become friendly and a cancel stays a cancel.
 function guarded(runner) {
   return async (job, onProgress = noop, signal) => {
@@ -821,7 +877,11 @@ function makeConverter({ id, label, from, to, needs, options, run, multi = false
     },
     run: guarded(async (job, onProgress, signal) => {
       await Promise.all(needs.map((name) => LOADERS[name]()));
-      return run(job, onProgress, signal);
+      // The file extension of the result. A run changes it when it makes a ZIP.
+      job.outExt = job.toExt ?? to[0];
+      const blob = await run(job, onProgress, signal);
+      addNotes(job, id);
+      return blob;
     }),
   };
 }
@@ -850,7 +910,7 @@ export const pdfConverters = [
     needs: ['pdfjs', 'fflate'],
     options: OPTIONS_TO_IMAGES,
     run: runPdfToImages,
-    note: 'One image per page. The result is a ZIP.',
+    note: 'One image per page. A PDF with several pages comes as a ZIP.',
   }),
   makeConverter({
     id: 'pdf-merge',

@@ -1,0 +1,7 @@
+# Dev tools only. Nothing here is shipped to the website.
+# resvg-py: turns the SVG icons into PNG. It installs from a wheel on Windows,
+# macOS and Linux with no system libraries. (CairoSVG needs the Cairo C
+# library, which is painful on Windows.)
+# Exact pin on purpose (released 2026-08-24).
+resvg-py==0.5.0
+pytest

@@ -62,3 +62,11 @@ test('growNote explains growth honestly and stays silent otherwise', () => {
   assert.equal(growNote('txt', 'pdf', 100, 900), '');
   assert.equal(growNote('csv', 'json', 100, 900), '');
 });
+
+test('findConverter lets a preset shrink a JPG as a JPG, but only for lossy pictures', () => {
+  const services = setup();
+  assert.equal(services.findShrinker('jpg').id, 'fake-image');
+  assert.equal(services.findConverter('jpg', 'jpg').id, 'fake-image');
+  assert.equal(services.findShrinker('png'), null); // PNG is lossless: a size target would not work
+  assert.equal(services.findConverter('png', 'png'), null);
+});

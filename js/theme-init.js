@@ -19,4 +19,13 @@
   }
 
   document.documentElement.dataset.theme = theme;
+
+  // Accent colour and motion choice from Settings. Same idea: set them before the page is drawn.
+  try {
+    const settings = JSON.parse(localStorage.getItem('lokalconver.settings.v1') || 'null');
+    if (settings && ['violet', 'cyan', 'amber', 'rose'].includes(settings.accent)) document.documentElement.dataset.accent = settings.accent;
+    if (settings && ['reduce', 'allow'].includes(settings.motion)) document.documentElement.dataset.motion = settings.motion;
+  } catch {
+    // Blocked storage or broken JSON: the defaults stay.
+  }
 }

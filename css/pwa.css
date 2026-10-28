@@ -1,0 +1,61 @@
+/* PWA pieces: status chip, update toast, install card.
+   Tokens only (css/tokens.css). Buttons and the card reuse .btn and .card. */
+
+/* Footer slot for the chip. Its own line, under the privacy sentence. */
+.pwa-chip-slot {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-3);
+}
+.pwa-chip-slot:empty { margin-top: 0; }
+
+.pwa-chip[hidden] { display: none; }
+.pwa-chip circle { fill: var(--success); }
+.pwa-chip[data-state="offline"] circle { fill: var(--warning); }
+
+/* Fixed host for the toast and the card: bottom centre, above the page. */
+.pwa-host {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--gutter) max(var(--space-4), env(safe-area-inset-bottom));
+  pointer-events: none; /* only the pieces below take taps */
+}
+.pwa-host > * { pointer-events: auto; }
+
+.pwa-toast,
+.pwa-card {
+  box-sizing: border-box;
+  width: min(100%, 26rem);
+  animation: pwa-rise var(--dur-base) var(--ease);
+}
+
+.pwa-toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-sm);
+}
+.pwa-toast__text { flex: 1 1 10rem; }
+
+.pwa-card { padding: var(--space-4) var(--space-5); }
+.pwa-card__title { margin: 0; font-size: var(--fs-md); font-weight: 600; }
+.pwa-card__body { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+.pwa-card__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+@keyframes pwa-rise {
+  from { opacity: 0; transform: translateY(var(--space-2)); }
+  to { opacity: 1; transform: none; }
+}
+/* Motion: tokens.css already sets every --dur-* to 0ms for people who ask for less motion. */

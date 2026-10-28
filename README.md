@@ -7,6 +7,9 @@ Local File Converter. Convert Anything. Upload Nothing
 
 ## Run it on your computer
 
+Do not double-click `index.html`. Browsers block JavaScript modules on `file://`
+addresses, so the page would stay on "Getting the converter ready...".
+
 - Windows: double-click `start.bat`
 - Mac or Linux: run `./start.sh`
 - Any system: `python tools/serve.py` (or `npm start`)
@@ -18,6 +21,12 @@ nothing is uploaded.
 
 - Images: PNG, JPG, GIF, WEBP, BMP, SVG, AVIF, HEIC/HEIF in; JPG, PNG, WEBP, BMP, ICO, AVIF out.
 - Documents: Word (.docx) to TXT, HTML or Markdown; Markdown to HTML; text to PDF.
+
+- PDF: PDF to PNG or JPG (one picture per page, a ZIP when there are several), PDF to text, pictures to PDF.
+
+  The **PDF** page also merges PDFs, splits them by page range, rotates pages, makes a PDF smaller and puts several
+
+  pictures into one PDF in the order you choose. The PDF engines are in `js/vendor/`: nothing is loaded from another site.
 - Data: CSV to JSON, JSON to CSV, Excel (.xlsx) to CSV or JSON.
 
 ## One-time setup for developers

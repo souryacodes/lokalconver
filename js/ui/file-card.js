@@ -6,6 +6,7 @@ import { el } from './dom.js';
 import { icon } from './icons.js';
 import { createCompareSlider } from './compare-slider.js';
 import { animateReveal, paintFinal, paintStart } from './reveal.js';
+import { mountOptionFields } from './option-form.js';
 import {
   categoryOf, formatBytes, growNote, isImageExt, optionFields, revealText, TIER_HINT,
 } from './format.js';
@@ -97,7 +98,8 @@ export function createCard(item, handlers) {
 
   function optionsBlock() {
     const f = optionFields(item.fromExt, item.target);
-    if (!f.quality && !f.resize && !f.size) return null;
+    const spec = item.optionSpec; // settings of the converter itself (the PDF tools), or null
+    if (!f.quality && !f.resize && !f.size && !spec) return null;
     const grid = el('div', { class: 'cv-options__grid' });
     const id = (name) => `cv-${name}-${item.id}`;
 
@@ -120,6 +122,15 @@ export function createCard(item, handlers) {
     if (f.size) {
       grid.append(field('Target size (KB)',
         numberInput(id('kb'), 'No limit', item.options.maxKB, '10', 100000, (v) => handlers.onOptions(item, { maxKB: v }))));
+    }
+    if (spec) {
+      const host = el('div', { class: 'cv-options__extra' });
+      grid.append(host);
+      mountOptionFields({
+        host, spec, values: item.options.extra, context: { toExt: item.target }, idPrefix: `cv-x-${item.id}`,
+        // A preset such as "PDF under 500 KB" already chose the size goal.
+        hide: item.options.maxKB ? ['targetKB'] : [],
+      });
     }
     const details = el('details', { class: 'cv-options' }, el('summary', { text: 'Options' }), grid);
     details.open = Boolean(item.optionsOpen);

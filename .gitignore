@@ -9,6 +9,9 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+# ...but NOT the vendored engine builds. pdf.js ships its code in legacy/build/, and the line above
+# was hiding pdf.min.mjs + pdf.worker.min.mjs from git, so the live site could never load them.
+!js/vendor/**/build/
 develop-eggs/
 dist/
 downloads/

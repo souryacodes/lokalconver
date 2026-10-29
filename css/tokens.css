@@ -1,26 +1,70 @@
-/* Design tokens: every colour, radius, space and timing lives here.
-   Nothing else in the CSS should use a raw colour or a magic number.
-   The theme is chosen by data-theme="dark" or data-theme="light" on <html>.
-   Colours come from PROJECT_BRIEF.md. */
+/* Design tokens: Claymorphism.
+   Every colour, radius, shadow, space and timing lives here. Nothing else in the CSS
+   should use a raw colour. To retheme the whole site, change the values in this file.
 
-/* Same in both themes */
+   Light ("clay day") is the main look. Dark ("clay night") is the same shapes in a
+   deep indigo. The theme is chosen by data-theme="light" or "dark" on <html>, and the
+   accent by data-accent (see local-features.css). The ids and classes the JavaScript
+   relies on did not change, only how they look. */
+
+/* ---------- Font: Poppins (SIL Open Font Licence 1.1), Latin subset, served from this site.
+   The page's security policy only allows files from this site, so there is no Google Fonts link.
+   If the files are missing, the stack below falls back to the device's rounded system font. */
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/poppins-400.woff") format("woff");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/poppins-500.woff") format("woff");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/poppins-700.woff") format("woff");
+}
+
+/* ---------- Same in both themes ---------- */
 :root {
-  /* Accent and status colours */
-  --accent-from: #7C5CFF;
-  --accent-to: #22D3EE;
-  --accent-gradient: linear-gradient(135deg, var(--accent-from), var(--accent-to));
-  --success: #34D399;
-  --warning: #FBBF24;
-  --danger: #F87171;
-  /* Dark ink for text and icons that sit on the gradient or on --success.
-     It has enough contrast on both. White would not. */
-  --on-accent: #07090F;
+  /* Accent (Settings can swap these, see data-accent in local-features.css).
+     Pastel on purpose: text on top of them is always the dark --on-accent ink. */
+  --accent-from: #8DB4FF;
+  --accent-to: #B5A0FF;
+  --accent-gradient: linear-gradient(145deg, var(--accent-from), var(--accent-to));
+  --on-accent: #1B2152;
 
-  /* Radii (cards use 16-20 px) */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* Status colours as fills (icons, dots). Text versions are theme specific, below. */
+  --success: #6FE3B8;
+  --warning: #FFC96B;
+  --danger: #FF8FAE;
+
+  /* More clay colours: Download button, icon badges, soft decoration */
+  --peach-from: #FFC79B;
+  --peach-to: #FF9F72;
+  --peach-shade: #D9743F;
+  --peach-glow: rgba(255, 150, 100, 0.45);
+  --pink-from: #FFAFCF;
+  --pink-to: #FF86B5;
+  --mint-from: #A9F1D3;
+  --mint-to: #66DBB0;
+  --lav-from: #D9CCFF;
+  --lav-to: #B7A3FF;
+  --lav-shade: #8E78E6;
+
+  /* Radii: big and soft, so everything looks inflated */
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 26px;
+  --radius-xl: 32px;
+  --radius-panel: 34px;
   --radius-pill: 999px;
 
   /* Spacing: a 4 px grid */
@@ -35,65 +79,200 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* Motion (brief: 150-250 ms) */
+  /* Motion */
   --dur-fast: 150ms;
   --dur-base: 200ms;
   --dur-slow: 250ms;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-pop: cubic-bezier(0.34, 1.4, 0.64, 1); /* a tiny overshoot: the "squish" */
 
   /* Type */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-sans: "Poppins", "Nunito", "Quicksand", ui-rounded, "SF Pro Rounded", "Varela Round",
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --fs-sm: 0.875rem;
   --fs-md: 1rem;
   --fs-lg: 1.125rem;
-  --fs-xl: clamp(1.5rem, 1.1rem + 2vw, 2rem);
+  --fs-xl: clamp(1.5rem, 1.1rem + 2vw, 2.125rem);
   --fs-hero: clamp(2rem, 1.2rem + 4vw, 3.75rem);
 
   /* Layout */
   --content-max: 68rem;
   --gutter: var(--space-4);
-  --control-h: 40px; /* height of header buttons: easy to tap */
+  --control-h: 44px; /* easy to tap */
 
   /* Keyboard focus ring */
   --focus-ring-width: 3px;
-  --focus-ring-offset: 2px;
+  --focus-ring-offset: 3px;
 }
 
-/* Dark is the default, even if data-theme is missing. */
+/* ---------- Light: clay day (default) ---------- */
 :root,
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #07090F;
-  --surface: #0F1424;
-  --surface-2: #151B30;
-  --border: #222A45;
-  --text: #EDEFF8;
-  --muted: #8E97B8;
-
-  /* Made from the colours above, for things the brief does not name */
-  --border-strong: rgba(142, 151, 184, 0.5);  /* muted at 50%: dashed drop area */
-  --accent-soft: rgba(124, 92, 255, 0.14);    /* accent at 14%: soft glow */
-  --glass-bg: rgba(7, 9, 15, 0.72);           /* bg at 72%: glass top bar */
-  --focus: #22D3EE;
-  --accent-text-bg: var(--accent-gradient);   /* gradient headline text */
-}
-
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #F6F7FB;
-  --surface: #FFFFFF;
-  /* The brief gives no light surface-2. This is a step between bg and border. */
-  --surface-2: #EDEFF8;
-  --border: #E3E6F2;
-  --text: #0E1330;
-  --muted: #5A6385;
+  --bg: #E4EBFB;          /* periwinkle mist: the page */
+  --panel: #F3F6FE;       /* the big dashboard pillow */
+  --surface: #FFFFFF;     /* white clay objects */
+  --surface-2: #EBEFFC;   /* carved-in wells and trays */
+  --field: #F9FAFF;       /* inside an input */
+  --border: rgba(110, 126, 190, 0.2);
+  --text: #262B55;
+  --muted: #5C6490;       /* 4.7:1 on the page, 5.7:1 on white */
 
-  --border-strong: rgba(90, 99, 133, 0.5);
-  --accent-soft: rgba(124, 92, 255, 0.1);
-  --glass-bg: rgba(246, 247, 251, 0.78);
-  --focus: #7C5CFF; /* the cyan end of the gradient is too pale on a light page */
-  /* Same reason: on light, headline accent text is solid violet, not gradient */
-  --accent-text-bg: linear-gradient(var(--accent-from), var(--accent-from));
+  /* Status colours for text: dark enough to read on white */
+  --success-text: #0B7A52;
+  --warning-text: #8F5300;
+  --danger-text: #C42B5F;
+
+  --border-strong: rgba(92, 100, 144, 0.45);
+  --dash: rgba(112, 130, 214, 0.5);          /* dashed drop area */
+  --accent-soft: rgba(141, 180, 255, 0.3);
+  --glass-bg: rgba(228, 235, 251, 0.72);
+  --scrim: rgba(228, 235, 251, 0.8);
+  --focus: #4F5DF2;
+  --accent-text-bg: linear-gradient(var(--focus), var(--focus));
+
+  /* Background scenery */
+  --scene-1: #DCD0FF;
+  --scene-2: #CDF3E5;
+  --scene-3: #FFDFCB;
+
+  /* Light and shade, tinted blue instead of grey so the clay feels warm */
+  --clay-hi: rgba(255, 255, 255, 0.95);
+  --clay-lo: rgba(104, 120, 190, 0.17);
+  --clay-drop: rgba(86, 104, 178, 0.25);
+  --well-lo: rgba(104, 120, 190, 0.27);
+  --well-hi: rgba(255, 255, 255, 0.95);
+  --emboss: 0 2px 0 rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- Dark: clay night ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1A1E3C;
+  --panel: #232850;
+  --surface: #2D3366;
+  --surface-2: #1F2447;
+  --field: #171B38;
+  --border: rgba(160, 170, 230, 0.16);
+  --text: #EEF0FF;
+  --muted: #A9AFD6;
+
+  --success-text: #7BE9BF;
+  --warning-text: #FFD27A;
+  --danger-text: #FF9DB8;
+
+  --border-strong: rgba(169, 175, 214, 0.5);
+  --dash: rgba(169, 180, 255, 0.34);
+  --accent-soft: rgba(141, 180, 255, 0.18);
+  --glass-bg: rgba(26, 30, 60, 0.72);
+  --scrim: rgba(18, 21, 46, 0.8);
+  --focus: #9DB8FF;
+  --accent-text-bg: var(--accent-gradient);
+
+  --scene-1: #2F2A66;
+  --scene-2: #17404A;
+  --scene-3: #4A2D40;
+
+  --clay-hi: rgba(255, 255, 255, 0.1);
+  --clay-lo: rgba(8, 10, 32, 0.55);
+  --clay-drop: rgba(5, 7, 24, 0.55);
+  --well-lo: rgba(6, 8, 28, 0.6);
+  --well-hi: rgba(255, 255, 255, 0.07);
+  --emboss: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- The clay shadows ----------
+   Raised: light inner shadow top-left, dark inner shadow bottom-right, soft cast shadow.
+   Inset (wells): the same two shadows, flipped, so the surface looks pressed in.
+   Pressed: a raised thing being pushed down.
+   Defined once here so a button, a card and a dialog all share one light source. */
+:root {
+  --clay-raised-lg:
+    inset -10px -10px 22px var(--clay-lo),
+    inset 10px 10px 22px var(--clay-hi),
+    18px 22px 48px var(--clay-drop);
+  --clay-raised:
+    inset -8px -8px 16px var(--clay-lo),
+    inset 8px 8px 16px var(--clay-hi),
+    10px 12px 28px var(--clay-drop);
+  --clay-raised-sm:
+    inset -4px -4px 9px var(--clay-lo),
+    inset 4px 4px 9px var(--clay-hi),
+    5px 7px 16px var(--clay-drop);
+  --clay-raised-xs:
+    inset -2px -2px 5px var(--clay-lo),
+    inset 2px 2px 5px var(--clay-hi),
+    3px 4px 10px var(--clay-drop);
+  --clay-hover:
+    inset -4px -4px 9px var(--clay-lo),
+    inset 4px 4px 9px var(--clay-hi),
+    8px 12px 22px var(--clay-drop);
+  --clay-pressed:
+    inset 5px 5px 11px var(--well-lo),
+    inset -4px -4px 9px var(--well-hi),
+    1px 2px 4px var(--clay-drop);
+  --clay-inset:
+    inset 8px 8px 16px var(--well-lo),
+    inset -8px -8px 16px var(--well-hi);
+  --clay-inset-sm:
+    inset 4px 4px 9px var(--well-lo),
+    inset -4px -4px 9px var(--well-hi);
+
+  /* Coloured clay (accent): used by Convert and the progress bar */
+  --accent-shade: #6E80E0;
+  --accent-glow: rgba(124, 148, 255, 0.45);
+  --accent-tint: #E4ECFF;
+  --accent-tint-2: #ECE6FF;
+  --accent-tint-lo: rgba(150, 160, 240, 0.3);
+
+  --clay-accent:
+    inset -5px -6px 12px var(--accent-shade),
+    inset 5px 6px 12px rgba(255, 255, 255, 0.55),
+    8px 11px 22px var(--accent-glow);
+  --clay-accent-hover:
+    inset -5px -6px 12px var(--accent-shade),
+    inset 5px 6px 12px rgba(255, 255, 255, 0.6),
+    10px 15px 28px var(--accent-glow);
+  --clay-accent-pressed:
+    inset 6px 7px 13px var(--accent-shade),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.35),
+    2px 3px 8px var(--accent-glow);
+  --clay-tinted:
+    inset -6px -6px 14px var(--accent-tint-lo),
+    inset 6px 6px 14px var(--clay-hi),
+    8px 12px 24px var(--clay-drop);
+
+  /* Coloured clay (peach): the Download button */
+  --clay-peach:
+    inset -5px -6px 12px var(--peach-shade),
+    inset 5px 6px 12px rgba(255, 255, 255, 0.55),
+    8px 11px 22px var(--peach-glow);
+  --clay-peach-hover:
+    inset -5px -6px 12px var(--peach-shade),
+    inset 5px 6px 12px rgba(255, 255, 255, 0.6),
+    10px 15px 28px var(--peach-glow);
+  --clay-peach-pressed:
+    inset 6px 7px 13px var(--peach-shade),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.35),
+    2px 3px 8px var(--peach-glow);
+
+  /* Coloured clay (lavender): icon badges */
+  --clay-lav:
+    inset -4px -5px 10px var(--lav-shade),
+    inset 4px 5px 10px rgba(255, 255, 255, 0.6),
+    6px 9px 18px var(--accent-tint-lo);
+}
+
+/* Modern browsers derive the accent shades from the chosen accent, so every accent
+   in Settings gets matching shadows. Older ones keep the blue values above. */
+@supports (color: color-mix(in srgb, red, blue)) {
+  :root {
+    --accent-shade: color-mix(in srgb, var(--accent-to) 60%, #3A4BC0);
+    --accent-glow: color-mix(in srgb, var(--accent-from) 60%, transparent);
+    --accent-tint: color-mix(in srgb, var(--accent-from) 30%, var(--surface));
+    --accent-tint-2: color-mix(in srgb, var(--accent-to) 34%, var(--surface));
+    --accent-tint-lo: color-mix(in srgb, var(--accent-to) 38%, transparent);
+  }
 }
 
 /* Respect the visitor's "reduce motion" setting: all timings become instant. */

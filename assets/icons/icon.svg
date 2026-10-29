@@ -1,16 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- LokalConver icon, purpose "any": a dark rounded tile with the brand mark. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+  <!-- App icon ("any" purpose): the logo on an inflated clay tile.
+       The tile gets soft light top-left, soft shade bottom-right and a cast shadow;
+       the logo gets its own cast shadow. Source picture: logo-mark-512.png (same folder).
+       Make the PNG icons from this file with: python tools/make_icons.py -->
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7C5CFF"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E3E9FC"/>
     </linearGradient>
+    <filter id="clay" filterUnits="userSpaceOnUse" x="-40" y="-40" width="600" height="620" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="20" result="sb"/>
+      <feOffset in="sb" dx="10" dy="18" result="so"/>
+      <feFlood flood-color="#5868B0" flood-opacity="0.34"/>
+      <feComposite in2="so" operator="in" result="cast"/>
+      <feOffset in="SourceAlpha" dx="14" dy="14" result="o1"/>
+      <feGaussianBlur in="o1" stdDeviation="14" result="b1"/>
+      <feComposite in="SourceAlpha" in2="b1" operator="out" result="e1"/>
+      <feFlood flood-color="#FFFFFF" flood-opacity="0.95"/>
+      <feComposite in2="e1" operator="in" result="hi"/>
+      <feOffset in="SourceAlpha" dx="-14" dy="-14" result="o2"/>
+      <feGaussianBlur in="o2" stdDeviation="14" result="b2"/>
+      <feComposite in="SourceAlpha" in2="b2" operator="out" result="e2"/>
+      <feFlood flood-color="#6878BE" flood-opacity="0.3"/>
+      <feComposite in2="e2" operator="in" result="lo"/>
+      <feMerge>
+        <feMergeNode in="cast"/>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="lo"/>
+        <feMergeNode in="hi"/>
+      </feMerge>
+    </filter>
+    <filter id="mark" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512" color-interpolation-filters="sRGB">
+      <feDropShadow dx="7" dy="12" stdDeviation="9" flood-color="#2A2F7A" flood-opacity="0.38"/>
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#07090F"/>
-  <!-- The lock-drop brand mark from assets/favicon.svg (24 x 24 units), centred and scaled. -->
-  <g transform="translate(256 256) scale(22) translate(-12 -10.8)">
-    <path d="M12 2.5c3.2 4 6 7.1 6 10.6a6 6 0 0 1-12 0c0-3.5 2.8-6.6 6-10.6z" fill="url(#g)"/>
-    <rect x="9.5" y="12.3" width="5" height="4" rx="1" fill="#07090F"/>
-    <path d="M10.6 12.3v-1.1a1.4 1.4 0 0 1 2.8 0v1.1" fill="none" stroke="#07090F" stroke-width="1.2" stroke-linecap="round"/>
-  </g>
+  <rect x="30" y="22" width="452" height="452" rx="124" fill="url(#tile)" filter="url(#clay)"/>
+  <image href="logo-mark-512.png" xlink:href="logo-mark-512.png" x="76" y="64" width="360" height="360" filter="url(#mark)"/>
 </svg>

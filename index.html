@@ -1,7 +1,7 @@
 <!doctype html>
-<!-- data-theme is "dark" by default. js/theme-init.js changes it before the
-     first paint if the visitor saved a choice or prefers a light system theme. -->
-<html lang="en" data-theme="dark">
+<!-- data-theme is "light" (clay day) when scripts are off. js/theme-init.js changes it before the
+     first paint: a saved choice first, then the system theme. "dark" is clay night. -->
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
 
@@ -35,11 +35,13 @@
   ">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07090F">
+  <meta name="theme-color" content="#E4EBFB">
   <meta name="description" content="Convert anything. Upload nothing.">
   <title>LokalConver - Convert anything. Upload nothing.</title>
 
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="./assets/favicon-48.png">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
   <link rel="stylesheet" href="./css/tokens.css">
@@ -58,24 +60,24 @@
   <script type="module" src="./js/app.js"></script>
 </head>
 <body>
+  <!-- Decoration only: pastel light and three inflated clay blobs. See .clay-scene in css/base.css. -->
+  <div class="clay-scene" aria-hidden="true">
+    <span class="clay-blob clay-blob--lavender"></span>
+    <span class="clay-blob clay-blob--mint"></span>
+    <span class="clay-blob clay-blob--peach"></span>
+  </div>
+
   <a class="skip-link" href="#main">Skip to main content</a>
 
   <header class="site-header">
     <div class="container header-inner">
 
       <a class="brand" href="#/convert">
-        <!-- Lock-drop icon: a water drop with a small padlock inside. -->
-        <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <defs>
-            <linearGradient id="lc-drop-gradient" x1="0" y1="0" x2="1" y2="1">
-              <stop class="stop-from" offset="0"/>
-              <stop class="stop-to" offset="1"/>
-            </linearGradient>
-          </defs>
-          <path d="M12 2.5c3.2 4 6 7.1 6 10.6a6 6 0 0 1-12 0c0-3.5 2.8-6.6 6-10.6z" fill="url(#lc-drop-gradient)"/>
-          <rect class="icon-on-accent-fill" x="9.5" y="12.3" width="5" height="4" rx="1"/>
-          <path class="icon-on-accent-stroke" d="M10.6 12.3v-1.1a1.4 1.4 0 0 1 2.8 0v1.1" fill="none" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
+        <!-- The logo sits on a small inflated clay tile (see .brand-badge in css/base.css).
+             The picture is decoration: the words "LokalConver" next to it name the link. -->
+        <span class="brand-badge" aria-hidden="true">
+          <img class="brand-logo" src="./assets/logo-mark.png" width="32" height="32" alt="" decoding="async">
+        </span>
         <span>LokalConver</span>
       </a>
 

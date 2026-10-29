@@ -32,7 +32,7 @@
 .pwa-card {
   box-sizing: border-box;
   width: min(100%, 26rem);
-  animation: pwa-rise var(--dur-base) var(--ease);
+  animation: pwa-rise var(--dur-base) var(--ease-pop);
 }
 
 .pwa-toast {
@@ -40,16 +40,16 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2) var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-lg);
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
   font-size: var(--fs-sm);
+  box-shadow: var(--clay-raised);
 }
 .pwa-toast__text { flex: 1 1 10rem; }
 
-.pwa-card { padding: var(--space-4) var(--space-5); }
+.pwa-card { padding: var(--space-5) var(--space-6); box-shadow: var(--clay-raised-lg); }
 .pwa-card__title { margin: 0; font-size: var(--fs-md); font-weight: 600; }
 .pwa-card__body { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
 .pwa-card__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }

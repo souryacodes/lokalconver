@@ -1,19 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- LokalConver icon, purpose "maskable". The background fills the WHOLE square
-       (no rounded corners, no transparency) because Android crops the icon to a circle
-       or a squircle. The mark stays inside the safe zone: a circle with a radius of 40%
-       of the width (204.8) around the centre. The mark reaches about 150. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+  <!-- Maskable and Apple icon: full bleed, because Android and iOS crop it themselves.
+       Everything important stays inside the central 80% circle (the safe zone).
+       Source picture: logo-mark-512.png (same folder). -->
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7C5CFF"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DCE4FB"/>
+      <stop offset="1" stop-color="#E9DFFF"/>
     </linearGradient>
+    <linearGradient id="pillow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E6ECFF"/>
+    </linearGradient>
+    <filter id="clay" filterUnits="userSpaceOnUse" x="-40" y="-40" width="600" height="620" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="20" result="sb"/>
+      <feOffset in="sb" dx="10" dy="18" result="so"/>
+      <feFlood flood-color="#5868B0" flood-opacity="0.34"/>
+      <feComposite in2="so" operator="in" result="cast"/>
+      <feOffset in="SourceAlpha" dx="14" dy="14" result="o1"/>
+      <feGaussianBlur in="o1" stdDeviation="14" result="b1"/>
+      <feComposite in="SourceAlpha" in2="b1" operator="out" result="e1"/>
+      <feFlood flood-color="#FFFFFF" flood-opacity="0.95"/>
+      <feComposite in2="e1" operator="in" result="hi"/>
+      <feOffset in="SourceAlpha" dx="-14" dy="-14" result="o2"/>
+      <feGaussianBlur in="o2" stdDeviation="14" result="b2"/>
+      <feComposite in="SourceAlpha" in2="b2" operator="out" result="e2"/>
+      <feFlood flood-color="#6878BE" flood-opacity="0.3"/>
+      <feComposite in2="e2" operator="in" result="lo"/>
+      <feMerge>
+        <feMergeNode in="cast"/>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="lo"/>
+        <feMergeNode in="hi"/>
+      </feMerge>
+    </filter>
+    <filter id="mark" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512" color-interpolation-filters="sRGB">
+      <feDropShadow dx="6" dy="10" stdDeviation="8" flood-color="#2A2F7A" flood-opacity="0.38"/>
+    </filter>
   </defs>
-  <rect x="0" y="0" width="512" height="512" fill="#07090F"/>
-  <!-- The lock-drop brand mark from assets/favicon.svg (24 x 24 units), centred and scaled. -->
-  <g transform="translate(256 256) scale(18) translate(-12 -10.8)">
-    <path d="M12 2.5c3.2 4 6 7.1 6 10.6a6 6 0 0 1-12 0c0-3.5 2.8-6.6 6-10.6z" fill="url(#g)"/>
-    <rect x="9.5" y="12.3" width="5" height="4" rx="1" fill="#07090F"/>
-    <path d="M10.6 12.3v-1.1a1.4 1.4 0 0 1 2.8 0v1.1" fill="none" stroke="#07090F" stroke-width="1.2" stroke-linecap="round"/>
-  </g>
+  <rect x="0" y="0" width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="252" r="188" fill="url(#pillow)" filter="url(#clay)"/>
+  <image href="logo-mark-512.png" xlink:href="logo-mark-512.png" x="106" y="98" width="300" height="300" filter="url(#mark)"/>
 </svg>

@@ -1,5 +1,6 @@
-/* Basic components: buttons, chips, cards, the drop area and icon colours.
-   Only the basics for now. Colours and sizes come from tokens.css. */
+/* Basic clay components: buttons, chips, cards, the drop area and icon colours.
+   The press rule is the same everywhere: hover lifts the object, a press pushes it
+   into the page (shadow flips to inset, a 2% squish). Colours and shadows: tokens.css. */
 
 /* ---------- Buttons ---------- */
 
@@ -9,29 +10,35 @@
   justify-content: center;
   gap: var(--space-2);
   min-height: var(--control-h);
-  padding: 0 var(--space-5);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   color: var(--text);
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.1;
   text-decoration: none;
   cursor: pointer;
+  box-shadow: var(--clay-raised-sm);
   transition:
-    background-color var(--dur-fast) var(--ease),
-    border-color var(--dur-fast) var(--ease),
-    filter var(--dur-fast) var(--ease),
-    transform var(--dur-fast) var(--ease);
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease-pop),
+    filter var(--dur-base) var(--ease);
 }
 
-.btn:active {
-  transform: translateY(1px);
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--clay-hover);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--clay-pressed);
 }
 
 .btn:disabled,
 .btn[aria-disabled="true"] {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -39,30 +46,32 @@
 .btn-primary {
   background: var(--accent-gradient);
   color: var(--on-accent);
+  font-weight: 700;
+  box-shadow: var(--clay-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.1);
+  box-shadow: var(--clay-accent-hover);
+  filter: brightness(1.03);
+}
+
+.btn-primary:active:not(:disabled) {
+  box-shadow: var(--clay-accent-pressed);
 }
 
 .btn-secondary {
-  background: var(--surface-2);
-  border-color: var(--border);
+  background: var(--panel);
 }
 
-.btn-secondary:hover:not(:disabled) {
-  border-color: var(--border-strong);
-}
-
-/* Text button used in the main navigation */
+/* Text button used in the main navigation (a segmented control inside the header) */
 .nav-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--control-h);
-  padding: 0 var(--space-3);
+  min-height: 40px;
+  padding: 0 var(--space-4);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--muted);
   font-weight: 600;
@@ -70,23 +79,30 @@
   cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease),
-    color var(--dur-fast) var(--ease);
+    color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease-pop);
 }
 
 .nav-btn:hover {
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
 }
 
-/* Current page: brighter text, a soft background and a line under it.
-   Not colour alone, and the same state is also in aria-current. */
+.nav-btn:active {
+  transform: scale(0.97);
+}
+
+/* Current page: an inflated accent pill. Not colour alone: it is also raised,
+   bolder, and the same state is in aria-current. */
 .nav-btn[aria-current="page"] {
-  background: var(--surface-2);
-  color: var(--text);
-  box-shadow: inset 0 -2px 0 var(--accent-from);
+  background: var(--accent-gradient);
+  color: var(--on-accent);
+  font-weight: 700;
+  box-shadow: var(--clay-accent);
 }
 
-/* Square button that holds only an icon */
+/* Round button that holds only an icon */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -94,16 +110,25 @@
   width: var(--control-h);
   height: var(--control-h);
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 0;
+  border-radius: 50%;
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease);
+  box-shadow: var(--clay-raised-sm);
+  transition:
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease-pop);
 }
 
 .icon-btn:hover {
-  background: var(--surface-2);
+  transform: translateY(-2px);
+  box-shadow: var(--clay-hover);
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+  box-shadow: var(--clay-pressed);
 }
 
 .icon-btn svg {
@@ -114,7 +139,7 @@
   stroke-linejoin: round;
 }
 
-/* Theme toggle: dark theme shows the sun (click for light), light shows the moon. */
+/* Theme toggle: light theme shows the moon (click for dark), dark shows the sun. */
 .theme-toggle .icon-moon {
   display: none;
 }
@@ -133,9 +158,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 32px;
-  padding: 0 var(--space-3);
-  border: 1px solid var(--border);
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--surface);
   color: var(--text);
@@ -143,6 +168,7 @@
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
+  box-shadow: var(--clay-raised-xs);
 }
 
 .chip-icon {
@@ -152,21 +178,29 @@
 
 /* A chip that can be pressed */
 .chip-button {
-  min-height: 36px;
+  min-height: 40px;
   cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease);
+  transition:
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease-pop);
 }
 
 .chip-button:hover {
-  background: var(--surface-2);
+  transform: translateY(-2px);
+  box-shadow: var(--clay-raised-sm);
+}
+
+.chip-button:active {
+  transform: scale(0.96);
+  box-shadow: var(--clay-pressed);
 }
 
 .chip-row {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: var(--space-3);
-  margin-top: var(--space-6);
+  gap: var(--space-4);
+  margin-top: var(--space-8);
 }
 
 /* ---------- Cards ---------- */
@@ -174,19 +208,18 @@
 .card {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
   background: var(--surface);
+  box-shadow: var(--clay-raised);
 }
 
 .card-raised {
-  background: var(--surface-2);
+  background: var(--panel);
 }
 
 /* ---------- Drop area (placeholder) ---------- */
-/* Very large on purpose: the whole screen should say "put your file here".
-   It is not interactive yet, so it has no hover state and no pointer cursor. */
+/* A carved-in well with a dashed rim. */
 
 .dropzone {
   display: flex;
@@ -196,21 +229,21 @@
   gap: var(--space-3);
   min-height: clamp(18rem, 50vh, 32rem);
   padding: var(--space-8) var(--space-6);
-  border: 2px dashed var(--border-strong);
+  border: 3px dashed var(--dash);
   border-radius: var(--radius-xl);
-  background:
-    radial-gradient(60% 80% at 50% 0%, var(--accent-soft), transparent 70%),
-    var(--surface);
+  background: var(--surface-2);
+  box-shadow: var(--clay-inset);
   text-align: center;
 }
 
 .dropzone-icon {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  background: var(--accent-gradient);
+  background: linear-gradient(145deg, var(--lav-from), var(--lav-to));
+  box-shadow: var(--clay-lav);
 }
 
 .dropzone-icon svg {

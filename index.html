@@ -34,16 +34,29 @@
     base-uri 'self'
   ">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- viewport-fit=cover lets the page use the whole screen on phones with a notch or a
+       rounded corner (the CSS keeps buttons clear of them with env(safe-area-inset-*)).
+       interactive-widget=resizes-content makes Android shrink the page when the keyboard opens.
+       Zooming is NOT switched off: people who need to pinch-zoom can. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#E4EBFB">
   <meta name="description" content="Convert anything. Upload nothing.">
+  <!-- When the site is added to a phone's home screen it opens like an app, without browser bars. -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="LokalConver">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- Stops iPhones from turning numbers such as "103 KB" or "2026" into phone-number links. -->
+  <meta name="format-detection" content="telephone=no">
   <title>LokalConver - Convert anything. Upload nothing.</title>
 
-  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="48x48" href="./assets/favicon-48.png">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+  <!-- The two fonts used above the fold start downloading right away, so text does not jump when they arrive. -->
+  <link rel="preload" href="./assets/fonts/poppins-400.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="./assets/fonts/poppins-700.woff" as="font" type="font/woff" crossorigin>
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/components.css">
@@ -52,6 +65,8 @@
   <link rel="stylesheet" href="./css/reorder-list.css">
   <link rel="stylesheet" href="./css/pdf-tools.css">
   <link rel="stylesheet" href="./css/pwa.css">
+  <!-- Touch and small-screen rules. Keep this LAST so it can fine-tune the files above. -->
+  <link rel="stylesheet" href="./css/mobile.css">
 
   <!-- Tiny plain script that sets the theme before the page is drawn, so the
        visitor never sees a flash of the wrong theme. -->

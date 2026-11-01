@@ -33,7 +33,7 @@ SHELL_DIRS = ["css", "js", "locales", "assets"]
 EXCLUDED_PATTERNS = ("js/vendor/*", "assets/icons/*.png")
 EXTENSIONS = {
     ".html", ".css", ".js", ".mjs", ".json", ".svg", ".png", ".webp",
-    ".ico", ".woff2", ".webmanifest",
+    ".ico", ".woff", ".woff2", ".webmanifest",
 }
 TEXT_EXTENSIONS = {".html", ".css", ".js", ".mjs", ".json", ".svg", ".webmanifest"}
 DEFAULT_MAX_FILE_KB = 150

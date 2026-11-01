@@ -39,11 +39,15 @@ select.lc-setting-control { -webkit-appearance: none; appearance: none; padding-
 
 /* Buttons: the same press rule as the rest of the site */
 .lc-button, .lc-shield-chip { display: inline-flex; justify-content: center; align-items: center; gap: .5rem; min-height: 46px; padding: .7rem 1.3rem; border: 0; border-radius: 999px; color: var(--text); background: var(--surface); font: 600 .9rem/1.2 var(--font-sans); cursor: pointer; text-decoration: none; box-shadow: var(--clay-raised-sm); transition: box-shadow var(--dur-base) var(--ease), transform var(--dur-base) var(--ease-pop); }
-.lc-button:hover:not(:disabled), .lc-shield-chip:hover { transform: translateY(-2px); box-shadow: var(--clay-hover); }
+@media (hover: hover) {
+  .lc-button:hover:not(:disabled), .lc-shield-chip:hover { transform: translateY(-2px); box-shadow: var(--clay-hover); }
+}
 .lc-button:active:not(:disabled), .lc-shield-chip:active { transform: translateY(0) scale(.98); box-shadow: var(--clay-pressed); }
 .lc-button:disabled { opacity: .6; cursor: wait; }
 .lc-button-primary { color: var(--on-accent); background: var(--accent-gradient); box-shadow: var(--clay-accent); }
-.lc-button-primary:hover:not(:disabled) { box-shadow: var(--clay-accent-hover); }
+@media (hover: hover) {
+  .lc-button-primary:hover:not(:disabled) { box-shadow: var(--clay-accent-hover); }
+}
 .lc-button-primary:active:not(:disabled) { box-shadow: var(--clay-accent-pressed); }
 .lc-button-secondary { background: var(--panel); }
 .lc-button-danger { color: var(--danger-text); }

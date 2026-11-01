@@ -78,19 +78,23 @@
   cursor: grabbing;
 }
 
-.reorder__handle:hover,
-.reorder__btn:hover:not(:disabled) {
-  color: var(--reorder-text);
-  background: var(--surface, #fff);
-  box-shadow: var(--clay-raised-xs);
+@media (hover: hover) {
+  .reorder__handle:hover,
+  .reorder__btn:hover:not(:disabled) {
+    color: var(--reorder-text);
+    background: var(--surface, #fff);
+    box-shadow: var(--clay-raised-xs);
+  }
 }
 
 .reorder__btn:active:not(:disabled) {
   box-shadow: var(--clay-pressed);
 }
 
-.reorder__btn[data-kind='remove']:hover {
-  color: var(--reorder-danger);
+@media (hover: hover) {
+  .reorder__btn[data-kind='remove']:hover {
+    color: var(--reorder-danger);
+  }
 }
 
 .reorder__btn:disabled {

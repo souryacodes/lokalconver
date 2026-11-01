@@ -58,21 +58,32 @@ export function mountConvertPage(root, services) {
     ? el('input', { type: 'file', webkitdirectory: true, hidden: true, tabindex: '-1', 'aria-hidden': 'true' })
     : null;
 
+  // Phones and tablets have no mouse: nobody can drag a file from somewhere else onto the page,
+  // and Ctrl+V is not on the keyboard. So on touch screens the words tell people to tap instead.
+  const touchFirst = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+
   const chooseBtn = el('button', { class: 'cv-btn', type: 'button', onclick: () => fileInput.click() }, icon('upload', 20), 'Choose files');
   const folderBtn = canPickFolder
-    ? el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', onclick: () => folderInput.click() }, icon('folder', 20), 'Choose a folder')
+    ? el('button', { class: 'cv-btn cv-btn--ghost cv-folder-btn', type: 'button', onclick: () => folderInput.click() }, icon('folder', 20), 'Choose a folder')
     : null;
 
   const empty = el('section', { class: 'cv-empty', 'aria-labelledby': 'cv-empty-title' },
     el('span', { class: 'cv-empty__icon', 'aria-hidden': 'true' }, icon('upload', 32)),
-    el('h2', { id: 'cv-empty-title', class: 'cv-empty__title', text: 'Drop files anywhere' }),
-    el('p', { class: 'cv-empty__text', text: 'Drag them onto this page, paste an image with Ctrl+V, or pick them yourself.' }),
+    el('h2', { id: 'cv-empty-title', class: 'cv-empty__title', text: touchFirst ? 'Add your files' : 'Drop files anywhere' }),
+    el('p', { class: 'cv-empty__text', text: touchFirst
+      ? 'Tap here to pick photos, PDFs or documents. They are converted on this device and never uploaded.'
+      : 'Drag them onto this page, paste an image with Ctrl+V, or pick them yourself.' }),
     el('div', { class: 'cv-empty__actions' }, chooseBtn, folderBtn));
+
+  // Tapping anywhere on the drop area opens the file picker (the buttons inside still work as before).
+  empty.addEventListener('click', (event) => {
+    if (!event.target.closest('button')) fileInput.click();
+  });
 
   const summary = el('p', { class: 'cv-summary' });
   const addBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Add files', onclick: () => fileInput.click() });
   const addFolderBtn = canPickFolder
-    ? el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Add folder', onclick: () => folderInput.click() })
+    ? el('button', { class: 'cv-btn cv-btn--ghost cv-folder-btn', type: 'button', text: 'Add folder', onclick: () => folderInput.click() })
     : null;
   const cancelAllBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Cancel all', onclick: () => cancelAll() });
   const clearBtn = el('button', { class: 'cv-btn cv-btn--ghost', type: 'button', text: 'Clear', onclick: () => clearAll() });
@@ -98,7 +109,7 @@ export function mountConvertPage(root, services) {
 
   const sound = createSound();
   const soundBtn = el('button', { class: 'cv-linkbtn', type: 'button', role: 'switch', onclick: () => { sound.set(!sound.enabled); paintSound(); } });
-  const helpBtn = el('button', { class: 'cv-linkbtn', type: 'button', text: 'Keyboard shortcuts (?)', onclick: () => shortcuts.open() });
+  const helpBtn = el('button', { class: 'cv-linkbtn cv-kbd-hint', type: 'button', text: 'Keyboard shortcuts (?)', onclick: () => shortcuts.open() });
   const foot = el('div', { class: 'cv-foot' }, soundBtn, helpBtn);
 
   const overlay = el('div', { class: 'cv-drop', 'aria-hidden': 'true' },
@@ -113,7 +124,9 @@ export function mountConvertPage(root, services) {
 
   root.replaceChildren(
     el('h1', { class: 'cv-title', tabindex: '-1', text: 'Convert anything. Upload nothing.' }),
-    el('p', { class: 'cv-lead', text: 'Drop your files anywhere on this page. They are converted on your device.' }),
+    el('p', { class: 'cv-lead', text: touchFirst
+      ? 'Your files are converted on this device. Nothing is uploaded, ever.'
+      : 'Drop your files anywhere on this page. They are converted on your device.' }),
     presetBar, empty, toolbar, queueSection, shelf, foot,
     overlay, toastHost, live, shortcuts.element, fileInput, folderInput);
 

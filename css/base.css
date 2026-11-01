@@ -28,6 +28,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Safety net: if anything is ever wider than the screen, it is cut instead of making
+   the whole page scroll sideways. "clip" (not "hidden") keeps the sticky header working. */
+@supports (overflow: clip) {
+  body {
+    overflow-x: clip;
+  }
+}
+
 h1, h2, h3, p, ul {
   margin: 0;
 }
@@ -65,6 +73,12 @@ svg {
 :focus-visible {
   outline: var(--focus-ring-width) solid var(--focus);
   outline-offset: var(--focus-ring-offset);
+}
+
+/* The router moves focus to the page heading after you change page, so screen readers start reading
+   there. A heading is not something you press, so it gets no ring. */
+[tabindex="-1"]:focus-visible {
+  outline: none;
 }
 
 /* ---------- Scenery: pastel light and a few inflated blobs ---------- */
@@ -119,9 +133,20 @@ svg {
   opacity: 0.8;
 }
 
+/* Phones: fewer and lighter blobs. Big blurred shadows are the most expensive thing to draw
+   on a budget phone, and the panel hides most of them anyway. */
 @media (max-width: 40rem) {
-  .clay-blob--peach { display: none; }
-  .clay-blob--lavender { top: 14rem; right: -10rem; }
+  .clay-blob--peach,
+  .clay-blob--mint { display: none; }
+
+  .clay-blob--lavender {
+    top: 14rem;
+    right: -10rem;
+    box-shadow:
+      inset -8px -10px 20px var(--clay-lo),
+      inset 8px 10px 18px var(--clay-hi),
+      10px 14px 28px var(--clay-drop);
+  }
 }
 
 /* ---------- Skip link ---------- */
@@ -149,7 +174,8 @@ svg {
   width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
-  padding-inline: var(--gutter);
+  /* The side padding also keeps content clear of a notch or rounded corner (phone on its side). */
+  padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px)) max(var(--gutter), env(safe-area-inset-right, 0px));
 }
 
 /* Keep text pages easy to read. Must stay below .container. */
@@ -163,27 +189,33 @@ svg {
 }
 
 /* ---------- Header: a floating clay capsule ---------- */
+/* Three layouts, chosen by the space there is (not by device names):
+   - up to 60rem (960 px): logo and buttons on row 1, the page tabs on row 2
+   - from 60rem: everything in one row
+   - phone on its side (short screen): the header scrolls away instead of covering a third of the screen */
 
 .site-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding-top: max(var(--space-3), env(safe-area-inset-top));
+  padding:
+    max(var(--space-3), env(safe-area-inset-top, 0px))
+    max(var(--space-3), env(safe-area-inset-right, 0px))
+    0
+    max(var(--space-3), env(safe-area-inset-left, 0px));
   pointer-events: none; /* the gaps beside the capsule stay clickable for the page below */
 }
 
-/* Small screens: logo and actions on the first row, nav on a second row.
-   At 360 px wide everything fits without scrolling sideways. */
 .site-header .header-inner {
   pointer-events: auto;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     "brand actions"
     "nav   nav";
   align-items: center;
   gap: var(--space-2) var(--space-3);
-  width: calc(100% - 2 * var(--gutter));
+  width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
   padding: var(--space-2) var(--space-2) var(--space-3) var(--space-4);
@@ -195,6 +227,7 @@ svg {
 .brand {
   grid-area: brand;
   justify-self: start;
+  min-width: var(--control-h);
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
@@ -204,6 +237,12 @@ svg {
   font-weight: 700;
   letter-spacing: -0.01em;
   text-decoration: none;
+}
+
+.brand > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* The logo sits on a small inflated clay tile. The picture has its own cast shadow,
@@ -228,9 +267,11 @@ svg {
   filter: drop-shadow(2px 3px 2px var(--clay-drop));
 }
 
-.brand:hover .brand-badge {
-  transform: translateY(-2px) rotate(-3deg);
-  box-shadow: var(--clay-raised-sm);
+@media (hover: hover) {
+  .brand:hover .brand-badge {
+    transform: translateY(-2px) rotate(-3deg);
+    box-shadow: var(--clay-raised-sm);
+  }
 }
 
 .brand:active .brand-badge {
@@ -238,18 +279,32 @@ svg {
   box-shadow: var(--clay-pressed);
 }
 
+/* The page tabs. The text size follows the screen width so all five always fit; if a screen is
+   so narrow that they still do not, the tray scrolls sideways instead of breaking the page. */
 .site-nav {
   grid-area: nav;
   display: flex;
   gap: var(--space-1);
+  min-width: 0;
   padding: var(--space-1);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
   border-radius: var(--radius-pill);
   background: var(--surface-2);
   box-shadow: var(--clay-inset-sm);
 }
 
+.site-nav::-webkit-scrollbar {
+  display: none;
+}
+
 .site-nav .nav-btn {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  min-width: var(--control-h); /* even the short "PDF" tab is a full 44 px wide */
+  padding-inline: 6px;
+  font-size: clamp(0.75rem, 6vw - 7px, 1rem);
+  white-space: nowrap;
 }
 
 .header-actions {
@@ -259,10 +314,9 @@ svg {
   gap: var(--space-2);
 }
 
-/* Very small phones (360 px): the header has a shield, Settings and the theme button.
-   The shield keeps its icon and its accessible name; only the word "Private" is hidden,
-   and the nav buttons use less side padding, so nothing scrolls sideways. */
-@media (max-width: 26rem) {
+/* Phones (up to 576 px): the shield keeps its icon and its accessible name; only the word "Private"
+   is hidden, which leaves the logo's name room to breathe. */
+@media (max-width: 36rem) {
   .header-actions .chip-button > span {
     position: absolute;
     width: 1px;
@@ -272,6 +326,22 @@ svg {
     white-space: nowrap;
   }
 
+  .header-actions {
+    gap: var(--space-1);
+  }
+
+  .header-actions .icon-btn,
+  .header-actions .chip-button {
+    width: var(--control-h);
+    height: var(--control-h);
+    min-height: var(--control-h);
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* Small phones (up to 416 px): slightly tighter header. */
+@media (max-width: 26rem) {
   .site-header .header-inner {
     padding: var(--space-2) var(--space-2) var(--space-3) var(--space-3);
   }
@@ -291,30 +361,54 @@ svg {
     width: 29px;
     height: 29px;
   }
+}
 
-  .header-actions {
-    gap: var(--space-1);
+/* 360 px and below (320 px phones, small Androids): a little tighter so it still fits. */
+@media (max-width: 22.5rem) {
+  .site-header {
+    padding-inline: max(var(--space-2), env(safe-area-inset-left, 0px)) max(var(--space-2), env(safe-area-inset-right, 0px));
   }
 
-  .header-actions .icon-btn,
+  .site-header .header-inner {
+    padding: var(--space-1) var(--space-1) var(--space-2) var(--space-2);
+  }
+
+  .brand {
+    font-size: 0.9375rem;
+  }
+
+  .brand-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 13px;
+  }
+
+  .brand-logo {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* The shield only opens the Proof page, which has its own tab, so it makes room here.
+     That keeps the two remaining buttons at the full 44 px touch size. */
   .header-actions .chip-button {
-    width: 40px;
-    height: 40px;
-    min-height: 40px;
-    padding: 0;
-    justify-content: center;
-  }
-
-  .site-nav .nav-btn {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding-inline: var(--space-2);
-    font-size: 0.8125rem;
+    display: none;
   }
 }
 
-/* Wider screens: one row. Logo left, nav in the middle, actions right. */
-@media (min-width: 48rem) {
+/* Folded phones and anything under about 300 px: the logo alone is enough, the word goes
+   (it stays in the page for screen readers, because the link's name comes from it). */
+@media (max-width: 19rem) {
+  .brand > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+/* Wide enough for one row: logo left, tabs in the middle, buttons right. */
+@media (min-width: 60rem) {
   .site-header .header-inner {
     grid-template-columns: 1fr auto 1fr;
     grid-template-areas: "brand nav actions";
@@ -328,10 +422,19 @@ svg {
 
   .site-nav .nav-btn {
     flex: 0 0 auto;
+    padding-inline: var(--space-4);
+    font-size: 1rem;
   }
 
   .header-actions {
     justify-self: end;
+  }
+}
+
+/* A phone on its side is only about 360 to 430 px tall. A sticky header would cover a third of it. */
+@media (max-height: 30rem) {
+  .site-header {
+    position: static;
   }
 }
 
@@ -381,7 +484,7 @@ svg {
 /* ---------- Footer ---------- */
 
 .site-footer {
-  padding-block: var(--space-6);
+  padding-block: var(--space-6) max(var(--space-6), env(safe-area-inset-bottom, 0px));
   color: var(--muted);
   font-size: var(--fs-sm);
   text-align: center;

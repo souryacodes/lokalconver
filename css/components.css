@@ -26,9 +26,11 @@
     filter var(--dur-base) var(--ease);
 }
 
-.btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--clay-hover);
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--clay-hover);
+  }
 }
 
 .btn:active:not(:disabled) {
@@ -50,9 +52,11 @@
   box-shadow: var(--clay-accent);
 }
 
-.btn-primary:hover:not(:disabled) {
-  box-shadow: var(--clay-accent-hover);
-  filter: brightness(1.03);
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: var(--clay-accent-hover);
+    filter: brightness(1.03);
+  }
 }
 
 .btn-primary:active:not(:disabled) {
@@ -84,9 +88,11 @@
     transform var(--dur-base) var(--ease-pop);
 }
 
-.nav-btn:hover {
-  background: var(--surface);
-  color: var(--text);
+@media (hover: hover) {
+  .nav-btn:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
 }
 
 .nav-btn:active {
@@ -121,9 +127,11 @@
     transform var(--dur-base) var(--ease-pop);
 }
 
-.icon-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--clay-hover);
+@media (hover: hover) {
+  .icon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--clay-hover);
+  }
 }
 
 .icon-btn:active {
@@ -185,9 +193,11 @@
     transform var(--dur-base) var(--ease-pop);
 }
 
-.chip-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--clay-raised-sm);
+@media (hover: hover) {
+  .chip-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--clay-raised-sm);
+  }
 }
 
 .chip-button:active {

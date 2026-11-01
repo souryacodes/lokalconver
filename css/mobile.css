@@ -1,0 +1,240 @@
+/* Touch and small-screen rules. Loaded LAST, so it can fine-tune everything above it.
+   Sections: 1 tapping, 2 big enough to hit, 3 no zoom when typing, 4 notches and keyboards,
+   5 short screens (phone on its side), 6 dialogs, 7 lighter animation on phones, 8 touch wording.
+   Only "pointer" and "hover" media queries are used for touch, never device names, so tablets,
+   foldables and laptops with a touch screen are all handled correctly. */
+
+/* ---------- 1. Tapping ---------- */
+
+html {
+  -webkit-tap-highlight-color: transparent; /* no grey flash: the clay already shows the press */
+}
+
+/* "manipulation" removes the old double-tap-to-zoom delay, so taps feel instant. Pinch-zoom still works. */
+a, button, summary, select, label, input, [role="button"], [role="switch"] {
+  touch-action: manipulation;
+}
+
+/* ---------- 2. Big enough to hit (44 px, the size Apple and Google both recommend) ---------- */
+
+@media (pointer: coarse) {
+  .nav-btn,
+  .chip-button,
+  .cv-chip,
+  .cv-linkbtn,
+  .lc-button,
+  .lc-shield-chip,
+  .cv-toast__action,
+  .icon-btn,
+  .cv-icon-btn {
+    min-height: var(--control-h);
+  }
+
+  .icon-btn,
+  .cv-icon-btn {
+    min-width: var(--control-h);
+  }
+
+  /* The quality slider: the groove stays slim but the touch area is a full finger tall. */
+  .cv-field input[type="range"] {
+    height: var(--control-h);
+  }
+
+  .lc-proof-policy-source summary {
+    display: flex;
+    align-items: center;
+    min-height: var(--control-h);
+  }
+
+  .cv-chips {
+    gap: 12px;
+  }
+}
+
+/* ---------- 3. No zoom when typing ---------- */
+/* iPhones zoom into any text field smaller than 16 px and stay zoomed. 16 px stops that. */
+
+@media (pointer: coarse), (max-width: 40rem) {
+  .cv-field input[type="number"],
+  .cv-field input[type="text"],
+  .cv-field select,
+  .lc-preset-field input,
+  .lc-setting-control {
+    font-size: 1rem;
+  }
+}
+
+/* ---------- 4. Notches, rounded corners, home bars and the on-screen keyboard ---------- */
+
+.cv-toasts {
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  width: min(460px, calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+}
+
+.cv-drop {
+  padding:
+    env(safe-area-inset-top, 0px)
+    env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+}
+
+.pwa-toast {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- 5. A phone on its side (about 360 to 430 px tall) ---------- */
+
+@media (max-height: 30rem) {
+  .site-main {
+    padding-block: var(--space-4) var(--space-8);
+  }
+
+  .cv,
+  .pt {
+    padding: 24px 28px 20px;
+  }
+
+  .cv-title,
+  .page-title {
+    font-size: clamp(1.4rem, 5vh, 1.9rem);
+  }
+
+  .cv-lead {
+    margin-bottom: 16px;
+  }
+
+  .cv-empty {
+    padding: 22px 20px;
+    gap: 8px;
+  }
+
+  .cv-empty__icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .cv-empty__icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .cv-empty__title {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .cv-empty__actions {
+    margin-top: 6px;
+  }
+
+  .chip-row {
+    margin-top: var(--space-4);
+  }
+}
+
+/* ---------- 6. Dialogs: always fit the screen, scroll inside, never scroll the page behind ---------- */
+
+.cv-dialog,
+.lc-settings-dialog {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 26rem) {
+  .lc-settings-dialog {
+    width: calc(100vw - 24px);
+    padding: 1.25rem;
+    border-radius: 1.75rem;
+  }
+
+  .cv-dialog {
+    padding: 22px;
+    border-radius: 28px;
+  }
+
+  /* Label above the control instead of beside it, so long labels never squeeze the dropdown */
+  .lc-setting-row:not(.lc-setting-checkbox) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .lc-setting-control {
+    width: 100%;
+  }
+}
+
+/* ---------- 7. Lighter on phones: animate only what the graphics chip can do for free ---------- */
+/* Moving or fading a layer is free. Changing a blurred shadow every frame is not, so on touch
+   screens a press changes its shadow at once (the squish itself is still animated). */
+
+@media (hover: none) {
+  .btn,
+  .nav-btn,
+  .icon-btn,
+  .chip-button,
+  .cv-btn,
+  .cv-chip,
+  .cv-icon-btn,
+  .cv-linkbtn,
+  .cv-toast__action,
+  .lc-button,
+  .lc-shield-chip,
+  .brand-badge {
+    transition-property: transform, filter;
+  }
+
+  /* Blurring a whole screen behind a dialog is slow on budget GPUs. A slightly stronger tint does the same job. */
+  .cv-drop,
+  .cv-dialog::backdrop,
+  .lc-settings-dialog::backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .cv-dialog::backdrop,
+  .lc-settings-dialog::backdrop {
+    background: rgba(38, 43, 85, 0.5);
+  }
+
+  :root[data-theme="dark"] .cv-dialog::backdrop,
+  :root[data-theme="dark"] .lc-settings-dialog::backdrop {
+    background: rgba(5, 7, 24, 0.72);
+  }
+
+  /* The loading placeholder pulses instead of sliding a gradient (a pulse is just opacity). */
+  .cv-skeleton {
+    background: var(--cv-surface-2);
+    animation: cv-pulse 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes cv-pulse {
+  50% { opacity: 0.5; }
+}
+
+/* ---------- 8. Wording and controls that only make sense with a mouse or a big screen ---------- */
+
+@media (pointer: coarse) {
+  /* The whole drop area opens the file picker when tapped (js/ui/convert.js). */
+  .cv-empty {
+    cursor: pointer;
+  }
+}
+
+/* Keyboard shortcuts are of no use on a touch-only device. */
+@media (hover: none) and (pointer: coarse) {
+  .cv-kbd-hint {
+    display: none;
+  }
+}
+
+/* Phones cannot pick a whole folder (the browsers do not support it), so the button would only confuse. */
+@media (pointer: coarse) and (max-width: 48rem) {
+  .cv-folder-btn {
+    display: none;
+  }
+}

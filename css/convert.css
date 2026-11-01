@@ -82,13 +82,17 @@
     transform var(--cv-t) var(--ease-pop),
     filter var(--cv-t) var(--ease);
 }
-.cv-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--clay-hover); }
+@media (hover: hover) {
+  .cv-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--clay-hover); }
+}
 .cv-btn:active:not(:disabled) { transform: translateY(0) scale(0.98); box-shadow: var(--clay-pressed); }
 .cv-btn:disabled { cursor: default; opacity: 0.6; box-shadow: var(--clay-raised-xs); }
 
 /* Quiet buttons in the toolbar: the same clay, one step lower */
 .cv-btn--ghost { background: var(--panel); box-shadow: var(--clay-raised-xs); }
-.cv-btn--ghost:hover:not(:disabled) { box-shadow: var(--clay-raised-sm); }
+@media (hover: hover) {
+  .cv-btn--ghost:hover:not(:disabled) { box-shadow: var(--clay-raised-sm); }
+}
 
 /* Download: peach clay */
 .cv-btn--solid {
@@ -96,7 +100,9 @@
   color: var(--on-accent); font-weight: 700;
   box-shadow: var(--clay-peach);
 }
-.cv-btn--solid:hover:not(:disabled) { box-shadow: var(--clay-peach-hover); filter: brightness(1.03); }
+@media (hover: hover) {
+  .cv-btn--solid:hover:not(:disabled) { box-shadow: var(--clay-peach-hover); filter: brightness(1.03); }
+}
 .cv-btn--solid:active:not(:disabled) { box-shadow: var(--clay-peach-pressed); }
 
 /* The ONE accent button. convert.js gives this class to exactly one button (Convert / Convert all / ZIP). */
@@ -106,7 +112,9 @@
   color: var(--cv-on-gradient); font-size: 1.1rem; font-weight: 700;
   box-shadow: var(--clay-accent);
 }
-.cv-btn--primary:hover:not(:disabled) { box-shadow: var(--clay-accent-hover); filter: brightness(1.03); }
+@media (hover: hover) {
+  .cv-btn--primary:hover:not(:disabled) { box-shadow: var(--clay-accent-hover); filter: brightness(1.03); }
+}
 .cv-btn--primary:active:not(:disabled) { box-shadow: var(--clay-accent-pressed); }
 
 /* The pre-selected "Convert to ..." button on each card: a big tinted pill with a white check badge */
@@ -130,7 +138,9 @@
   box-shadow: var(--clay-raised-xs);
   transition: box-shadow var(--cv-t) var(--ease), transform var(--cv-t) var(--ease-pop);
 }
-.cv-chip:hover { transform: translateY(-2px); box-shadow: var(--clay-raised-sm); }
+@media (hover: hover) {
+  .cv-chip:hover { transform: translateY(-2px); box-shadow: var(--clay-raised-sm); }
+}
 .cv-chip:active { transform: scale(0.96); box-shadow: var(--clay-pressed); }
 
 .cv-icon-btn {
@@ -139,7 +149,9 @@
   font: inherit; font-size: 1.25rem; cursor: pointer;
   transition: box-shadow var(--cv-t) var(--ease), transform var(--cv-t) var(--ease-pop), background-color var(--cv-t) var(--ease);
 }
-.cv-icon-btn:hover { color: var(--cv-text); background: var(--cv-surface); box-shadow: var(--clay-raised-xs); }
+@media (hover: hover) {
+  .cv-icon-btn:hover { color: var(--cv-text); background: var(--cv-surface); box-shadow: var(--clay-raised-xs); }
+}
 .cv-icon-btn:active { transform: scale(0.92); box-shadow: var(--clay-pressed); }
 
 .cv-linkbtn {
@@ -148,7 +160,9 @@
   color: var(--cv-muted); font: inherit; font-size: 0.875rem; font-weight: 500; cursor: pointer;
   transition: box-shadow var(--cv-t) var(--ease), background-color var(--cv-t) var(--ease), transform var(--cv-t) var(--ease-pop);
 }
-.cv-linkbtn:hover { color: var(--cv-text); background: var(--cv-surface); box-shadow: var(--clay-raised-xs); }
+@media (hover: hover) {
+  .cv-linkbtn:hover { color: var(--cv-text); background: var(--cv-surface); box-shadow: var(--clay-raised-xs); }
+}
 .cv-linkbtn:active { transform: scale(0.97); box-shadow: var(--clay-pressed); }
 /* The sound toggle has role="switch": a small clay lamp shows its state */
 .cv-linkbtn[role="switch"]::before {

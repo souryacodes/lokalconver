@@ -8,11 +8,11 @@ Local File Converter. Convert Anything. Upload Nothing
 ## Run it on your Devices
 
 - Windows: double-click `start.bat`
+- Android or IOS: Open live demo link.
 - Mac or Linux: run `./start.sh`
 - Any system: `python tools/serve.py` (or `npm start`)
-- Android or IOS: Open live demo link.
 
-It opens http://localhost:8000. The server only listens on this computer and
+In Computer: It opens http://localhost:8000. The server only listens on this computer and
 nothing is uploaded.
 
 ## What it converts
